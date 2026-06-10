@@ -20,7 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AccessCode,
+  AccessHistoryList,
+  ActivePass,
   CodeRequest,
   CodeValidationResult,
   ErrorResponse,
@@ -50,7 +51,6 @@ export const getHealthCheckUrl = () => {
 }
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const healthCheck = async ( options?: RequestInit): Promise<HealthStatus> => {
@@ -268,6 +268,160 @@ export const useUpdatePatient = <TError = ErrorType<ErrorResponse>,
       return useMutation(getUpdatePatientMutationOptions(options));
     }
 
+export const getGetActivePassUrl = (id: string,) => {
+
+
+
+
+  return `/api/patient/${id}/pass`
+}
+
+/**
+ * @summary Get the current active (non-expired, non-revoked) pass for a patient
+ */
+export const getActivePass = async (id: string, options?: RequestInit): Promise<ActivePass> => {
+
+  return customFetch<ActivePass>(getGetActivePassUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetActivePassQueryKey = (id: string,) => {
+    return [
+    `/api/patient/${id}/pass`
+    ] as const;
+    }
+
+
+export const getGetActivePassQueryOptions = <TData = Awaited<ReturnType<typeof getActivePass>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getActivePass>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetActivePassQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getActivePass>>> = ({ signal }) => getActivePass(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getActivePass>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetActivePassQueryResult = NonNullable<Awaited<ReturnType<typeof getActivePass>>>
+export type GetActivePassQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the current active (non-expired, non-revoked) pass for a patient
+ */
+
+export function useGetActivePass<TData = Awaited<ReturnType<typeof getActivePass>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getActivePass>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetActivePassQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAccessHistoryUrl = (id: string,) => {
+
+
+
+
+  return `/api/patient/${id}/access-history`
+}
+
+/**
+ * @summary Get the access history for a patient
+ */
+export const getAccessHistory = async (id: string, options?: RequestInit): Promise<AccessHistoryList> => {
+
+  return customFetch<AccessHistoryList>(getGetAccessHistoryUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAccessHistoryQueryKey = (id: string,) => {
+    return [
+    `/api/patient/${id}/access-history`
+    ] as const;
+    }
+
+
+export const getGetAccessHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getAccessHistory>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccessHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAccessHistoryQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAccessHistory>>> = ({ signal }) => getAccessHistory(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAccessHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAccessHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getAccessHistory>>>
+export type GetAccessHistoryQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the access history for a patient
+ */
+
+export function useGetAccessHistory<TData = Awaited<ReturnType<typeof getAccessHistory>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccessHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAccessHistoryQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export const getCreateCodeUrl = () => {
 
 
@@ -277,11 +431,11 @@ export const getCreateCodeUrl = () => {
 }
 
 /**
- * @summary Generate a 6-digit access code for a patient
+ * @summary Generate a 6-digit access code for a patient (revokes any existing active code)
  */
-export const createCode = async (codeRequest: CodeRequest, options?: RequestInit): Promise<AccessCode> => {
+export const createCode = async (codeRequest: CodeRequest, options?: RequestInit): Promise<ActivePass> => {
 
-  return customFetch<AccessCode>(getCreateCodeUrl(),
+  return customFetch<ActivePass>(getCreateCodeUrl(),
   {
     ...options,
     method: 'POST',
@@ -326,7 +480,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateCodeMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Generate a 6-digit access code for a patient
+ * @summary Generate a 6-digit access code for a patient (revokes any existing active code)
  */
 export const useCreateCode = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCode>>, TError,{data: BodyType<CodeRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -348,7 +502,7 @@ export const getValidateCodeUrl = (code: string,) => {
 }
 
 /**
- * @summary Validate a 6-digit access code and return patient intake
+ * @summary Validate a 6-digit access code and return patient intake (logs the view)
  */
 export const validateCode = async (code: string, options?: RequestInit): Promise<CodeValidationResult> => {
 
@@ -395,7 +549,7 @@ export type ValidateCodeQueryError = ErrorType<ErrorResponse>
 
 
 /**
- * @summary Validate a 6-digit access code and return patient intake
+ * @summary Validate a 6-digit access code and return patient intake (logs the view)
  */
 
 export function useValidateCode<TData = Awaited<ReturnType<typeof validateCode>>, TError = ErrorType<ErrorResponse>>(
@@ -415,4 +569,74 @@ export function useValidateCode<TData = Awaited<ReturnType<typeof validateCode>>
 
 
 
+
+export const getRevokeCodeUrl = (code: string,) => {
+
+
+
+
+  return `/api/codes/${code}`
+}
+
+/**
+ * @summary Revoke an active access code
+ */
+export const revokeCode = async (code: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRevokeCodeUrl(code),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRevokeCodeMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCode>>, TError,{code: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeCode>>, TError,{code: string}, TContext> => {
+
+const mutationKey = ['revokeCode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeCode>>, {code: string}> = (props) => {
+          const {code} = props ?? {};
+
+          return  revokeCode(code,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeCodeMutationResult = NonNullable<Awaited<ReturnType<typeof revokeCode>>>
+
+    export type RevokeCodeMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Revoke an active access code
+ */
+export const useRevokeCode = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCode>>, TError,{code: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeCode>>,
+        TError,
+        {code: string},
+        TContext
+      > => {
+      return useMutation(getRevokeCodeMutationOptions(options));
+    }
 

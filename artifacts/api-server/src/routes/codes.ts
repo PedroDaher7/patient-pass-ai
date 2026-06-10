@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
-import { eq, lt } from "drizzle-orm";
-import { db, patientsTable, accessCodesTable } from "@workspace/db";
+import { and, eq, gt, isNull, lt } from "drizzle-orm";
+import { db, patientsTable, accessCodesTable, accessHistoryTable } from "@workspace/db";
 import {
   CreateCodeBody,
   ValidateCodeParams,
   ValidateCodeResponse,
+  RevokeCodeParams,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -28,14 +29,25 @@ function serializePatient(patient: typeof patientsTable.$inferSelect) {
   };
 }
 
+function serializeCode(code: typeof accessCodesTable.$inferSelect) {
+  return {
+    code: code.code,
+    patientId: code.patientId,
+    expiresAt: code.expiresAt instanceof Date ? code.expiresAt.toISOString() : String(code.expiresAt),
+    revokedAt: code.revokedAt instanceof Date
+      ? code.revokedAt.toISOString()
+      : code.revokedAt ?? null,
+  };
+}
+
 router.post("/codes", async (req, res): Promise<void> => {
   const body = CreateCodeBody.safeParse(req.body);
   if (!body.success) {
-    res.status(400).json({ error: body.error.message });
+    res.status(400).json({ error: body.error.message, errorCode: "INVALID_REQUEST" });
     return;
   }
 
-  const { patientId, expiresInMinutes } = body.data;
+  const { patientId } = body.data;
 
   const [patient] = await db
     .select({ id: patientsTable.id })
@@ -43,35 +55,41 @@ router.post("/codes", async (req, res): Promise<void> => {
     .where(eq(patientsTable.id, patientId));
 
   if (!patient) {
-    res.status(404).json({ error: "Patient not found" });
+    res.status(404).json({ error: "Patient not found", errorCode: "PATIENT_NOT_FOUND" });
     return;
   }
 
-  // Clean up expired codes
+  // Clean up old expired codes
   await db.delete(accessCodesTable).where(lt(accessCodesTable.expiresAt, new Date()));
 
-  const minutes = expiresInMinutes ?? 30;
-  const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
+  // Revoke any existing active codes for this patient
+  await db
+    .update(accessCodesTable)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(
+        eq(accessCodesTable.patientId, patientId),
+        gt(accessCodesTable.expiresAt, new Date()),
+        isNull(accessCodesTable.revokedAt),
+      ),
+    );
+
+  const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000); // 4 hours
   const code = generateCode();
 
-  await db.insert(accessCodesTable).values({
-    code,
-    patientId,
-    expiresAt,
-  });
+  const [created] = await db
+    .insert(accessCodesTable)
+    .values({ code, patientId, expiresAt })
+    .returning();
 
   req.log.info({ patientId, code, expiresAt }, "Access code created");
-  res.status(201).json({
-    code,
-    patientId,
-    expiresAt: expiresAt.toISOString(),
-  });
+  res.status(201).json(serializeCode(created));
 });
 
 router.get("/codes/:code", async (req, res): Promise<void> => {
   const params = ValidateCodeParams.safeParse(req.params);
   if (!params.success) {
-    res.status(400).json({ error: params.error.message });
+    res.status(400).json({ error: params.error.message, errorCode: "INVALID_REQUEST" });
     return;
   }
 
@@ -81,12 +99,17 @@ router.get("/codes/:code", async (req, res): Promise<void> => {
     .where(eq(accessCodesTable.code, params.data.code));
 
   if (!entry) {
-    res.status(404).json({ error: "Code not found or expired" });
+    res.status(404).json({ error: "Code not found", errorCode: "CODE_NOT_FOUND" });
+    return;
+  }
+
+  if (entry.revokedAt !== null) {
+    res.status(404).json({ error: "This pass has been revoked by the patient", errorCode: "CODE_REVOKED" });
     return;
   }
 
   if (entry.expiresAt < new Date()) {
-    res.status(404).json({ error: "Code has expired" });
+    res.status(404).json({ error: "This pass has expired", errorCode: "CODE_EXPIRED" });
     return;
   }
 
@@ -96,17 +119,47 @@ router.get("/codes/:code", async (req, res): Promise<void> => {
     .where(eq(patientsTable.id, entry.patientId));
 
   if (!patient) {
-    res.status(404).json({ error: "Patient not found" });
+    res.status(404).json({ error: "Patient not found", errorCode: "PATIENT_NOT_FOUND" });
     return;
   }
 
-  req.log.info({ code: params.data.code, patientId: entry.patientId }, "Code validated");
+  // Log the access to history
+  await db.insert(accessHistoryTable).values({
+    code: entry.code,
+    patientId: entry.patientId,
+  });
+
+  req.log.info({ code: params.data.code, patientId: entry.patientId }, "Code validated and view logged");
   res.json(ValidateCodeResponse.parse({
     patient: serializePatient(patient),
-    expiresAt: entry.expiresAt instanceof Date
-      ? entry.expiresAt.toISOString()
-      : String(entry.expiresAt),
+    expiresAt: entry.expiresAt instanceof Date ? entry.expiresAt.toISOString() : String(entry.expiresAt),
   }));
+});
+
+router.delete("/codes/:code", async (req, res): Promise<void> => {
+  const params = RevokeCodeParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message, errorCode: "INVALID_REQUEST" });
+    return;
+  }
+
+  const [entry] = await db
+    .select({ code: accessCodesTable.code })
+    .from(accessCodesTable)
+    .where(eq(accessCodesTable.code, params.data.code));
+
+  if (!entry) {
+    res.status(404).json({ error: "Code not found", errorCode: "CODE_NOT_FOUND" });
+    return;
+  }
+
+  await db
+    .update(accessCodesTable)
+    .set({ revokedAt: new Date() })
+    .where(eq(accessCodesTable.code, params.data.code));
+
+  req.log.info({ code: params.data.code }, "Access code revoked");
+  res.sendStatus(204);
 });
 
 export default router;

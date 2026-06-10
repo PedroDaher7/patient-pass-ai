@@ -6,6 +6,7 @@ export const accessCodesTable = pgTable("access_codes", {
   code: text("code").primaryKey(),
   patientId: text("patient_id").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -21,7 +21,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -85,11 +84,61 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /patient/{id}/pass:
+    get:
+      operationId: getActivePass
+      tags: [patient]
+      summary: Get the current active (non-expired, non-revoked) pass for a patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Active pass
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivePass"
+        "404":
+          description: No active pass
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /patient/{id}/access-history:
+    get:
+      operationId: getAccessHistory
+      tags: [patient]
+      summary: Get the access history for a patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Access history entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessHistoryList"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /codes:
     post:
       operationId: createCode
       tags: [codes]
-      summary: Generate a 6-digit access code for a patient
+      summary: Generate a 6-digit access code for a patient (revokes any existing active code)
       requestBody:
         required: true
         content:
@@ -102,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccessCode"
+                $ref: "#/components/schemas/ActivePass"
         "404":
           description: Patient not found
           content:
@@ -114,7 +163,7 @@ paths:
     get:
       operationId: validateCode
       tags: [codes]
-      summary: Validate a 6-digit access code and return patient intake
+      summary: Validate a 6-digit access code and return patient intake (logs the view)
       parameters:
         - name: code
           in: path
@@ -129,7 +178,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/CodeValidationResult"
         "404":
-          description: Code not found or expired
+          description: Code not found, expired, or revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: revokeCode
+      tags: [codes]
+      summary: Revoke an active access code
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Code revoked
+        "404":
+          description: Code not found
           content:
             application/json:
               schema:
@@ -150,8 +219,12 @@ components:
       properties:
         error:
           type: string
+        errorCode:
+          type: string
+          description: Machine-readable error kind (CODE_NOT_FOUND, CODE_EXPIRED, CODE_REVOKED, PATIENT_NOT_FOUND)
       required:
         - error
+        - errorCode
 
     Allergy:
       type: object
@@ -361,13 +434,10 @@ components:
       properties:
         patientId:
           type: string
-        expiresInMinutes:
-          type: ["integer", "null"]
       required:
         - patientId
-        - expiresInMinutes
 
-    AccessCode:
+    ActivePass:
       type: object
       properties:
         code:
@@ -376,10 +446,40 @@ components:
           type: string
         expiresAt:
           type: string
+        revokedAt:
+          type: ["string", "null"]
       required:
         - code
         - patientId
         - expiresAt
+        - revokedAt
+
+    AccessHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        patientId:
+          type: string
+        viewedAt:
+          type: string
+      required:
+        - id
+        - code
+        - patientId
+        - viewedAt
+
+    AccessHistoryList:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccessHistoryEntry"
+      required:
+        - entries
 
     CodeValidationResult:
       type: object

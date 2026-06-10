@@ -9,7 +9,6 @@ import * as zod from 'zod';
 
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -167,16 +166,47 @@ export const UpdatePatientResponse = zod.object({
 
 
 /**
- * @summary Generate a 6-digit access code for a patient
+ * @summary Get the current active (non-expired, non-revoked) pass for a patient
  */
-export const CreateCodeBody = zod.object({
+export const GetActivePassParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetActivePassResponse = zod.object({
+  "code": zod.string(),
   "patientId": zod.string(),
-  "expiresInMinutes": zod.number().nullable()
+  "expiresAt": zod.string(),
+  "revokedAt": zod.string().nullable()
 })
 
 
 /**
- * @summary Validate a 6-digit access code and return patient intake
+ * @summary Get the access history for a patient
+ */
+export const GetAccessHistoryParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetAccessHistoryResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.number(),
+  "code": zod.string(),
+  "patientId": zod.string(),
+  "viewedAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Generate a 6-digit access code for a patient (revokes any existing active code)
+ */
+export const CreateCodeBody = zod.object({
+  "patientId": zod.string()
+})
+
+
+/**
+ * @summary Validate a 6-digit access code and return patient intake (logs the view)
  */
 export const ValidateCodeParams = zod.object({
   "code": zod.coerce.string()
@@ -228,6 +258,14 @@ export const ValidateCodeResponse = zod.object({
   "updatedAt": zod.string()
 }),
   "expiresAt": zod.string()
+})
+
+
+/**
+ * @summary Revoke an active access code
+ */
+export const RevokeCodeParams = zod.object({
+  "code": zod.coerce.string()
 })
 
 

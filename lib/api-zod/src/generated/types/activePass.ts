@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface CodeRequest {
+export interface ActivePass {
+  code: string;
   patientId: string;
+  expiresAt: string;
+  /** @nullable */
+  revokedAt: string | null;
 }

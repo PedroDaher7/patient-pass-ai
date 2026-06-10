@@ -1,40 +1,67 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useState } from "react";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useValidateCode } from "@workspace/api-client-react";
-import { AlertCircle, Loader2, Calendar, FileText, Syringe, Building2 } from "lucide-react";
+import { useValidateCode, getValidateCodeQueryKey } from "@workspace/api-client-react";
+import { AlertCircle, Loader2, Calendar, FileText, Syringe, Building2, ShieldOff, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+type ApiErrorLike = { data?: { errorCode?: string; error?: string } };
+
+function getErrorMessage(error: unknown): { heading: string; body: string } {
+  const code = (error as ApiErrorLike)?.data?.errorCode;
+  switch (code) {
+    case "CODE_REVOKED":
+      return {
+        heading: "Pass revoked",
+        body: "The patient has revoked this access code. Ask them to generate a new pass.",
+      };
+    case "CODE_EXPIRED":
+      return {
+        heading: "Pass expired",
+        body: "This code is no longer valid. Ask the patient to generate a new pass.",
+      };
+    case "CODE_NOT_FOUND":
+      return {
+        heading: "Code not found",
+        body: "No matching code was found. Check the number and try again.",
+      };
+    default:
+      return {
+        heading: "Invalid code",
+        body: "That code could not be validated. Check the number and try again.",
+      };
+  }
+}
+
+function getErrorIcon(error: unknown) {
+  const code = (error as ApiErrorLike)?.data?.errorCode;
+  if (code === "CODE_REVOKED") return <ShieldOff className="w-4 h-4" />;
+  if (code === "CODE_EXPIRED") return <Clock className="w-4 h-4" />;
+  return <AlertCircle className="w-4 h-4" />;
+}
+
 export default function Provider() {
-  const [location] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
-  const codeParam = searchParams.get("code");
+  const codeParam = searchParams.get("code") ?? "";
 
-  const [inputCode, setInputCode] = useState(codeParam || "");
-  const [activeCode, setActiveCode] = useState(codeParam || "");
-
-  // Clear URL params without reloading to make it look clean
-  useEffect(() => {
-    if (codeParam) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [codeParam]);
+  const [inputCode, setInputCode] = useState(codeParam);
+  const [activeCode, setActiveCode] = useState(codeParam);
 
   const { data, isLoading, error, isError } = useValidateCode(activeCode, {
-    query: { enabled: !!activeCode, retry: false }
+    query: { queryKey: getValidateCodeQueryKey(activeCode), enabled: !!activeCode, retry: false },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputCode.length === 6) {
-      setActiveCode(inputCode);
-    }
+    const trimmed = inputCode.replace(/\D/g, "").slice(0, 6);
+    if (trimmed.length === 6) setActiveCode(trimmed);
   };
 
   if (!data) {
+    const errInfo = isError ? getErrorMessage(error) : null;
+
     return (
       <Layout>
         <div className="max-w-md mx-auto mt-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -44,27 +71,39 @@ export default function Provider() {
                 <FileText className="w-6 h-6" />
               </div>
               <CardTitle className="text-2xl text-slate-800">Provider Access</CardTitle>
-              <p className="text-slate-500 mt-2 text-sm px-6">Enter the 6-digit code shared by the patient to securely access their intake form.</p>
+              <p className="text-slate-500 mt-2 text-sm px-6">
+                Enter the 6-digit code shared by the patient to securely access their intake form.
+              </p>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="flex flex-col items-center">
-                  <Input 
-                    type="text" 
-                    placeholder="000000" 
+                  <Input
+                    type="text"
+                    placeholder="000000"
                     maxLength={6}
                     value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => setInputCode(e.target.value.replace(/\D/g, ""))}
                     className="text-center text-4xl tracking-[0.5em] font-mono h-20 max-w-[240px] border-slate-300 focus-visible:ring-primary shadow-sm"
                   />
                 </div>
-                {isError && (
-                  <div className="flex items-center justify-center text-sm text-destructive gap-2 bg-destructive/10 p-3 rounded-md animate-in fade-in">
-                    <AlertCircle className="w-4 h-4" />
-                    Invalid or expired code
+
+                {isError && errInfo && (
+                  <div className="flex flex-col gap-1 bg-destructive/10 border border-destructive/20 p-4 rounded-md animate-in fade-in">
+                    <div className="flex items-center gap-2 text-destructive font-medium text-sm">
+                      {getErrorIcon(error)}
+                      {errInfo.heading}
+                    </div>
+                    <p className="text-sm text-slate-600 pl-6">{errInfo.body}</p>
                   </div>
                 )}
-                <Button type="submit" size="lg" className="w-full text-base font-medium h-12 shadow-sm" disabled={inputCode.length !== 6 || isLoading}>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full text-base font-medium h-12 shadow-sm"
+                  disabled={inputCode.replace(/\D/g, "").length !== 6 || isLoading}
+                >
                   {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
                   Access Record
                 </Button>
@@ -86,11 +125,16 @@ export default function Provider() {
             {patient.firstName} {patient.lastName}
           </h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-slate-600 font-medium">
-            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-slate-400" /> DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-slate-400" />
+              DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}
+            </span>
             <span className="text-slate-300">&bull;</span>
             <span>{patient.gender}</span>
             <span className="text-slate-300">&bull;</span>
-            <span className="text-slate-500 text-sm">Last updated: {new Date(patient.updatedAt).toLocaleDateString()}</span>
+            <span className="text-slate-500 text-sm">
+              Last updated: {new Date(patient.updatedAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
         <Button variant="outline" onClick={() => { setActiveCode(""); setInputCode(""); }} className="text-slate-500">
@@ -101,7 +145,7 @@ export default function Provider() {
       <div className="grid grid-cols-1 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <Card className="border-slate-200 shadow-sm overflow-hidden">
           <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4 px-6">
-            <CardTitle className="text-lg font-semibold text-slate-800">Contact & Insurance</CardTitle>
+            <CardTitle className="text-lg font-semibold text-slate-800">Contact &amp; Insurance</CardTitle>
           </CardHeader>
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
             <div>
@@ -124,9 +168,9 @@ export default function Provider() {
             <div className="md:col-span-2 pt-4 border-t border-slate-100">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Emergency Contact</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <div className="text-sm"><span className="text-slate-500 block mb-1">Name</span><span className="font-medium">{patient.emergencyContact.name}</span></div>
-                 <div className="text-sm"><span className="text-slate-500 block mb-1">Relationship</span><span className="font-medium">{patient.emergencyContact.relationship}</span></div>
-                 <div className="text-sm"><span className="text-slate-500 block mb-1">Phone</span><span className="font-medium">{patient.emergencyContact.phone}</span></div>
+                <div className="text-sm"><span className="text-slate-500 block mb-1">Name</span><span className="font-medium">{patient.emergencyContact.name}</span></div>
+                <div className="text-sm"><span className="text-slate-500 block mb-1">Relationship</span><span className="font-medium">{patient.emergencyContact.relationship}</span></div>
+                <div className="text-sm"><span className="text-slate-500 block mb-1">Phone</span><span className="font-medium">{patient.emergencyContact.phone}</span></div>
               </div>
             </div>
           </CardContent>
@@ -149,7 +193,7 @@ export default function Provider() {
                         <div className="font-medium text-slate-900 text-base">{a.name}</div>
                         <div className="text-sm text-slate-600 mt-1">Reaction: {a.reaction}</div>
                       </div>
-                      <Badge variant={a.severity.toLowerCase() === 'severe' ? 'destructive' : 'secondary'} className="capitalize mt-0.5">
+                      <Badge variant={a.severity.toLowerCase() === "severe" ? "destructive" : "secondary"} className="capitalize mt-0.5">
                         {a.severity}
                       </Badge>
                     </li>
@@ -158,7 +202,7 @@ export default function Provider() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="border-slate-200 shadow-sm overflow-hidden h-full">
             <CardHeader className="bg-blue-50/30 border-b border-slate-100 py-4 px-6 flex flex-row items-center gap-2">
               <Syringe className="w-5 h-5 text-blue-500" />
@@ -198,7 +242,7 @@ export default function Provider() {
                   {patient.conditions.map((c, i) => (
                     <li key={i} className="p-5 hover:bg-slate-50 transition-colors">
                       <div className="font-medium text-slate-900 mb-1">{c.name}</div>
-                      {c.diagnosedDate && <div className="text-sm text-slate-500 mb-2">Diagnosed: {new Date(c.diagnosedDate).toLocaleDateString()}</div>}
+                      {c.diagnosedDate && <div className="text-sm text-slate-500 mb-2">Diagnosed: {c.diagnosedDate}</div>}
                       {c.notes && <div className="text-sm bg-slate-50 border border-slate-100 p-3 rounded-md text-slate-700 leading-relaxed">{c.notes}</div>}
                     </li>
                   ))}
@@ -209,7 +253,7 @@ export default function Provider() {
 
           <Card className="border-slate-200 shadow-sm overflow-hidden h-full">
             <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4 px-6">
-              <CardTitle className="text-lg font-semibold text-slate-800">Surgeries & Procedures</CardTitle>
+              <CardTitle className="text-lg font-semibold text-slate-800">Surgeries &amp; Procedures</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {patient.surgeries.length === 0 ? (
@@ -220,7 +264,7 @@ export default function Provider() {
                     <li key={i} className="p-5 hover:bg-slate-50 transition-colors">
                       <div className="font-medium text-slate-900 mb-1">{s.procedure}</div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
-                        {s.date && <div className="text-sm text-slate-500 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{new Date(s.date).toLocaleDateString()}</div>}
+                        {s.date && <div className="text-sm text-slate-500 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{s.date}</div>}
                         {s.hospital && <div className="text-sm text-slate-500 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" />{s.hospital}</div>}
                       </div>
                       {s.notes && <div className="text-sm text-slate-600 mt-2">{s.notes}</div>}
@@ -231,7 +275,6 @@ export default function Provider() {
             </CardContent>
           </Card>
         </div>
-
       </div>
     </Layout>
   );

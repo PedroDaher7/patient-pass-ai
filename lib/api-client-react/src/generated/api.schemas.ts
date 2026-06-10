@@ -11,6 +11,8 @@ export interface HealthStatus {
 
 export interface ErrorResponse {
   error: string;
+  /** Machine-readable error kind (CODE_NOT_FOUND, CODE_EXPIRED, CODE_REVOKED, PATIENT_NOT_FOUND) */
+  errorCode: string;
 }
 
 export interface Allergy {
@@ -93,14 +95,25 @@ export interface PatientInput {
 
 export interface CodeRequest {
   patientId: string;
-  /** @nullable */
-  expiresInMinutes: number | null;
 }
 
-export interface AccessCode {
+export interface ActivePass {
   code: string;
   patientId: string;
   expiresAt: string;
+  /** @nullable */
+  revokedAt: string | null;
+}
+
+export interface AccessHistoryEntry {
+  id: number;
+  code: string;
+  patientId: string;
+  viewedAt: string;
+}
+
+export interface AccessHistoryList {
+  entries: AccessHistoryEntry[];
 }
 
 export interface CodeValidationResult {

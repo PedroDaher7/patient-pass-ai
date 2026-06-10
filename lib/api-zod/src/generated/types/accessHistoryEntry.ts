@@ -6,8 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AccessCode {
+export interface AccessHistoryEntry {
+  id: number;
   code: string;
   patientId: string;
-  expiresAt: string;
+  viewedAt: string;
 }

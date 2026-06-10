@@ -5,7 +5,8 @@
  * CareForm AI API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AccessHistoryEntry } from './accessHistoryEntry';
 
-export interface CodeRequest {
-  patientId: string;
+export interface AccessHistoryList {
+  entries: AccessHistoryEntry[];
 }

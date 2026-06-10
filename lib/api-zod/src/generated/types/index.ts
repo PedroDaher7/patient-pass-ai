@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export * from './accessCode';
+export * from './accessHistoryEntry';
+export * from './accessHistoryList';
+export * from './activePass';
 export * from './allergy';
 export * from './codeRequest';
 export * from './codeValidationResult';
