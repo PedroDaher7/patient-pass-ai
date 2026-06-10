@@ -895,7 +895,7 @@ export default function Home() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
             <div className="flex items-center gap-2">
               <QrCode className="w-4 h-4 text-blue-600" />
-              <h2 className="text-sm font-semibold text-slate-800">Your CareForm Pass</h2>
+              <h2 className="text-sm font-semibold text-slate-800">Your CarePass</h2>
             </div>
             {(history?.entries?.length ?? 0) > 0 && (
               <button onClick={() => setShowHistory(h => !h)} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors">
@@ -1192,7 +1192,7 @@ function PatientHeader({ saveStatus, onReset }: { saveStatus: "idle" | "saving" 
     <header className="border-b bg-white border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-3">
         <Link href="/" className="font-bold text-xl tracking-tight text-primary hover:opacity-80 transition-opacity">
-          CareForm AI
+          CarePass AI
         </Link>
         <span className="hidden sm:block text-xs font-medium bg-blue-50 text-blue-600 px-2 py-1 rounded-full">Your Intake</span>
       </div>

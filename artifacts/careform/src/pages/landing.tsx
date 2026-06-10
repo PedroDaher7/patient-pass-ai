@@ -63,12 +63,12 @@ function HeroFlow() {
           <ArrowRight className="w-3 h-3 text-blue-400 -ml-1 flex-shrink-0" />
         </div>
 
-        {/* CareForm AI center node */}
+        {/* CarePass AI center node */}
         <div className="flex flex-col items-center gap-2 flex-shrink-0">
           <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl shadow-blue-300/50 flex items-center justify-center ring-4 ring-blue-100">
             <Brain className="w-8 h-8 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">CareForm AI</span>
+          <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">CarePass AI</span>
           {/* Share options */}
           <div className="flex gap-2 mt-1">
             <div className="bg-white border border-slate-100 rounded-xl px-2.5 py-2 shadow-sm flex flex-col items-center gap-1">
@@ -192,7 +192,7 @@ export default function Landing() {
 
       {/* ════════════════════════════════════════════ NAV */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/80 px-6 md:px-10 py-4 flex items-center justify-between">
-        <span className="font-bold text-lg tracking-tight text-primary">CareForm AI</span>
+        <span className="font-bold text-lg tracking-tight text-primary">CarePass AI</span>
         <nav className="hidden md:flex items-center gap-6 text-sm text-slate-500">
           <a href="#solution" className="hover:text-slate-900 transition-colors">Product</a>
           <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How it works</a>
@@ -227,7 +227,7 @@ export default function Landing() {
             </h1>
 
             <p className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 text-lg md:text-xl text-slate-500 leading-relaxed mb-8 max-w-2xl mx-auto">
-              CareForm AI gives you one secure health intake profile you maintain once and share with any doctor, clinic, or hospital in seconds — by QR code or a temporary access code.
+              CarePass AI gives you one secure health intake profile you maintain once and share with any doctor, clinic, or hospital in seconds — by QR code or a temporary access code.
             </p>
 
             {/* Hero visual */}
@@ -247,7 +247,7 @@ export default function Landing() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-400 flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/patient">
                 <Button size="lg" className="w-full sm:w-auto text-base h-14 px-10 gap-2.5 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
-                  Create my CareForm
+                  Create my CarePass
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
@@ -329,7 +329,7 @@ export default function Landing() {
             </FadeIn>
             <FadeIn delay={50} className="text-center mb-2">
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                Meet CareForm AI
+                Meet CarePass AI
               </h2>
             </FadeIn>
             <FadeIn delay={100} className="text-center mb-4">
@@ -346,7 +346,7 @@ export default function Landing() {
                 { icon: ClipboardList,  title: "Unified intake profile",           body: "Every field providers ask for — medications, allergies, conditions, insurance, surgeries, consents — in one organized place." },
                 { icon: QrCode,         title: "Secure sharing",                   body: "Generate a temporary QR code or 6-digit access code before your appointment. Share in seconds, on any device." },
                 { icon: Lock,           title: "Patient-controlled access",         body: "You decide who sees your information and for how long. Revoke any code instantly. Your data never leaves your control." },
-                { icon: Sparkles,       title: "AI intake review",                  body: "CareForm flags missing information and writes a clinician-ready summary the moment your provider opens your record." },
+                { icon: Sparkles,       title: "AI intake review",                  body: "CarePass flags missing information and writes a clinician-ready summary the moment your provider opens your record." },
                 { icon: History,        title: "Audit trail",                       body: "See exactly when your information was shared and viewed. Full visibility into who accessed your record and when." },
                 { icon: FileCheck,      title: "Provider-ready data",               body: "Clean, standardized intake arrives before it reaches their system — no manual re-entry, no decoding handwriting." },
               ].map((f, i) => (
@@ -378,9 +378,9 @@ export default function Landing() {
                 {
                   n: "01",
                   icon: ClipboardList,
-                  title: "Create your CareForm",
+                  title: "Create your CarePass",
                   body: "Enter your health intake and update it whenever something changes. Your medication changed, new allergy, new provider — update once, everywhere.",
-                  cta: "Create my CareForm",
+                  cta: "Create my CarePass",
                   href: "/patient",
                 },
                 {
@@ -449,12 +449,12 @@ export default function Landing() {
                       Robert is 74 and recently moved closer to his daughter. He takes several medications, has multiple allergies, and sees three specialists.
                     </p>
                     <p className="text-slate-600 leading-relaxed mt-3">
-                      Instead of redoing forms at every visit, his daughter keeps his CareForm current. When Robert sees a new cardiologist, everything is organized, complete, and ready to share — without a single clipboard.
+                      Instead of redoing forms at every visit, his daughter keeps his CarePass current. When Robert sees a new cardiologist, everything is organized, complete, and ready to share — without a single clipboard.
                     </p>
                   </div>
                   <Link href="/patient">
                     <Button size="sm" className="h-10 px-6 text-sm gap-2 shadow-sm shadow-primary/20">
-                      Start a CareForm
+                      Start a CarePass
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
@@ -497,12 +497,12 @@ export default function Landing() {
                 </FadeIn>
                 <FadeIn delay={100} className="mb-8">
                   <p className="text-slate-500 text-lg leading-relaxed">
-                    CareForm reviews the profile, flags missing or outdated details, scores completeness, and writes provider-ready summaries — all from the intake data you've already provided.
+                    CarePass reviews the profile, flags missing or outdated details, scores completeness, and writes provider-ready summaries — all from the intake data you've already provided.
                   </p>
                 </FadeIn>
                 <FadeIn delay={150}>
                   <p className="text-xs text-slate-400 leading-relaxed border border-slate-100 rounded-xl p-4 bg-slate-50">
-                    <span className="font-semibold text-slate-500">Disclaimer:</span> CareForm AI does not provide medical diagnosis, treatment recommendations, or clinical decision support.
+                    <span className="font-semibold text-slate-500">Disclaimer:</span> CarePass AI does not provide medical diagnosis, treatment recommendations, or clinical decision support.
                   </p>
                 </FadeIn>
               </div>
@@ -543,7 +543,7 @@ export default function Landing() {
             </FadeIn>
             <FadeIn delay={100} className="mb-12">
               <p className="text-slate-300 text-lg leading-relaxed max-w-2xl">
-                CareForm works alongside providers, not instead of them. It improves the quality and consistency of intake before it ever reaches a provider system — including Oracle Health. Oracle acquired Cerner, now Oracle Health, which makes CareForm the natural patient-side front door that feeds clean, standardized intake straight into the EHR.
+                CarePass works alongside providers, not instead of them. It improves the quality and consistency of intake before it ever reaches a provider system — including Oracle Health. Oracle acquired Cerner, now Oracle Health, which makes CarePass the natural patient-side front door that feeds clean, standardized intake straight into the EHR.
               </p>
             </FadeIn>
 
@@ -592,7 +592,7 @@ export default function Landing() {
             <FadeIn delay={150} className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/patient">
                 <Button size="lg" className="w-full sm:w-auto text-base h-14 px-10 gap-2.5 shadow-lg shadow-primary/25 hover:shadow-xl transition-shadow">
-                  Create my CareForm
+                  Create my CarePass
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
@@ -614,7 +614,7 @@ export default function Landing() {
 
         {/* ════════════════════════════════════════════ FOOTER */}
         <footer className="border-t border-slate-100 px-6 md:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-bold text-base tracking-tight text-primary">CareForm AI</span>
+          <span className="font-bold text-base tracking-tight text-primary">CarePass AI</span>
           <span className="text-sm text-slate-400 text-center">
             Healthcare intake made simple, secure, and patient controlled.
           </span>
