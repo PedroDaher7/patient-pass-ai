@@ -218,13 +218,12 @@ export default function Landing() {
           <div className="relative max-w-3xl mx-auto">
             {/* Announce pill */}
             <div className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-both">
-              <SectionLabel>Healthcare intake reinvented</SectionLabel>
+              <SectionLabel>The healthcare intake passport</SectionLabel>
             </div>
 
             <h1 className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-75 text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] font-extrabold leading-[1.08] tracking-tight mb-6">
-              Stop filling out the same{" "}
-              <span className="text-primary">medical forms</span>{" "}
-              over and over.
+              Your health intake pass,{" "}
+              <span className="text-primary">always current and ready to share.</span>
             </h1>
 
             <p className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 text-lg md:text-xl text-slate-500 leading-relaxed mb-8 max-w-2xl mx-auto">
