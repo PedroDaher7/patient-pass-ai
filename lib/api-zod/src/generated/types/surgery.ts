@@ -11,7 +11,5 @@ export interface Surgery {
   /** @nullable */
   date: string | null;
   /** @nullable */
-  hospital: string | null;
-  /** @nullable */
-  notes: string | null;
+  facility: string | null;
 }

@@ -15,18 +15,33 @@ import {
 
 const router: IRouter = Router();
 
-function serializePatient(patient: typeof patientsTable.$inferSelect) {
+function serializePatient(p: typeof patientsTable.$inferSelect) {
   return {
-    ...patient,
-    insurance: patient.insurance as Record<string, string>,
-    emergencyContact: patient.emergencyContact as Record<string, string>,
-    allergies: patient.allergies as Record<string, string>[],
-    medications: patient.medications as Record<string, string>[],
-    conditions: patient.conditions as Record<string, string>[],
-    surgeries: patient.surgeries as Record<string, string>[],
-    updatedAt: patient.updatedAt instanceof Date
-      ? patient.updatedAt.toISOString()
-      : String(patient.updatedAt),
+    id: p.id,
+    firstName: p.firstName,
+    lastName: p.lastName,
+    dateOfBirth: p.dateOfBirth,
+    biologicalSex: p.biologicalSex,
+    genderIdentity: p.genderIdentity,
+    preferredLanguage: p.preferredLanguage,
+    maritalStatus: p.maritalStatus,
+    bloodType: p.bloodType,
+    phone: p.phone,
+    email: p.email,
+    address: p.address,
+    careTeam: p.careTeam as Record<string, string>,
+    insurance: p.insurance as Record<string, string>,
+    insuranceSecondary: (p.insuranceSecondary ?? null) as Record<string, string> | null,
+    emergencyContact: p.emergencyContact as Record<string, string>,
+    allergies: p.allergies as Record<string, string>[],
+    medications: p.medications as Record<string, string>[],
+    conditions: p.conditions as Record<string, string>[],
+    surgeries: p.surgeries as Record<string, string>[],
+    immunizations: p.immunizations as Record<string, string>[],
+    familyHistory: p.familyHistory as Record<string, string>[],
+    socialHistory: p.socialHistory as Record<string, string>,
+    vitals: p.vitals as Record<string, string>,
+    updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : String(p.updatedAt),
   };
 }
 
@@ -35,9 +50,7 @@ function serializeCode(code: typeof accessCodesTable.$inferSelect) {
     code: code.code,
     patientId: code.patientId,
     expiresAt: code.expiresAt instanceof Date ? code.expiresAt.toISOString() : String(code.expiresAt),
-    revokedAt: code.revokedAt instanceof Date
-      ? code.revokedAt.toISOString()
-      : code.revokedAt ?? null,
+    revokedAt: code.revokedAt instanceof Date ? code.revokedAt.toISOString() : code.revokedAt ?? null,
   };
 }
 
@@ -48,11 +61,7 @@ router.get("/patient/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [patient] = await db
-    .select()
-    .from(patientsTable)
-    .where(eq(patientsTable.id, params.data.id));
-
+  const [patient] = await db.select().from(patientsTable).where(eq(patientsTable.id, params.data.id));
   if (!patient) {
     res.status(404).json({ error: "Patient not found", errorCode: "PATIENT_NOT_FOUND" });
     return;
@@ -147,7 +156,7 @@ router.get("/patient/:id/access-history", async (req, res): Promise<void> => {
     .limit(50);
 
   res.json(GetAccessHistoryResponse.parse({
-    entries: entries.map((e) => ({
+    entries: entries.map(e => ({
       ...e,
       viewedAt: e.viewedAt instanceof Date ? e.viewedAt.toISOString() : String(e.viewedAt),
     })),

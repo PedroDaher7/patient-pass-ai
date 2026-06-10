@@ -221,7 +221,6 @@ components:
           type: string
         errorCode:
           type: string
-          description: Machine-readable error kind (CODE_NOT_FOUND, CODE_EXPIRED, CODE_REVOKED, PATIENT_NOT_FOUND)
       required:
         - error
         - errorCode
@@ -231,14 +230,14 @@ components:
       properties:
         name:
           type: string
-        severity:
-          type: string
         reaction:
+          type: string
+        severity:
           type: string
       required:
         - name
-        - severity
         - reaction
+        - severity
 
     Medication:
       type: object
@@ -249,13 +248,19 @@ components:
           type: string
         frequency:
           type: string
+        route:
+          type: string
         prescriber:
+          type: string
+        reason:
           type: string
       required:
         - name
         - dose
         - frequency
+        - route
         - prescriber
+        - reason
 
     Condition:
       type: object
@@ -264,11 +269,14 @@ components:
           type: string
         diagnosedDate:
           type: ["string", "null"]
+        status:
+          type: string
         notes:
           type: ["string", "null"]
       required:
         - name
         - diagnosedDate
+        - status
         - notes
 
     Surgery:
@@ -278,15 +286,74 @@ components:
           type: string
         date:
           type: ["string", "null"]
-        hospital:
-          type: ["string", "null"]
-        notes:
+        facility:
           type: ["string", "null"]
       required:
         - procedure
         - date
-        - hospital
-        - notes
+        - facility
+
+    Immunization:
+      type: object
+      properties:
+        vaccine:
+          type: string
+        date:
+          type: string
+      required:
+        - vaccine
+        - date
+
+    FamilyHistoryEntry:
+      type: object
+      properties:
+        relation:
+          type: string
+        condition:
+          type: string
+      required:
+        - relation
+        - condition
+
+    SocialHistory:
+      type: object
+      properties:
+        smoking:
+          type: string
+        alcohol:
+          type: string
+        occupation:
+          type: string
+        exercise:
+          type: string
+      required:
+        - smoking
+        - alcohol
+        - occupation
+        - exercise
+
+    CareTeam:
+      type: object
+      properties:
+        pcp:
+          type: string
+        referringPhysician:
+          type: string
+        visitSpecialty:
+          type: string
+        reasonForVisit:
+          type: string
+        preferredPharmacy:
+          type: string
+        pharmacyPhone:
+          type: string
+      required:
+        - pcp
+        - referringPhysician
+        - visitSpecialty
+        - reasonForVisit
+        - preferredPharmacy
+        - pharmacyPhone
 
     Insurance:
       type: object
@@ -297,12 +364,15 @@ components:
           type: string
         group:
           type: string
+        policyholder:
+          type: string
         phone:
           type: string
       required:
         - plan
         - memberId
         - group
+        - policyholder
         - phone
 
     EmergencyContact:
@@ -319,6 +389,26 @@ components:
         - relationship
         - phone
 
+    Vitals:
+      type: object
+      properties:
+        heightFt:
+          type: string
+        heightIn:
+          type: string
+        weightLbs:
+          type: string
+        systolic:
+          type: string
+        diastolic:
+          type: string
+      required:
+        - heightFt
+        - heightIn
+        - weightLbs
+        - systolic
+        - diastolic
+
     Patient:
       type: object
       properties:
@@ -330,7 +420,15 @@ components:
           type: string
         dateOfBirth:
           type: string
-        gender:
+        biologicalSex:
+          type: string
+        genderIdentity:
+          type: string
+        preferredLanguage:
+          type: string
+        maritalStatus:
+          type: string
+        bloodType:
           type: string
         phone:
           type: string
@@ -338,8 +436,14 @@ components:
           type: string
         address:
           type: string
+        careTeam:
+          $ref: "#/components/schemas/CareTeam"
         insurance:
           $ref: "#/components/schemas/Insurance"
+        insuranceSecondary:
+          oneOf:
+            - $ref: "#/components/schemas/Insurance"
+            - type: "null"
         emergencyContact:
           $ref: "#/components/schemas/EmergencyContact"
         allergies:
@@ -358,6 +462,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Surgery"
+        immunizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Immunization"
+        familyHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/FamilyHistoryEntry"
+        socialHistory:
+          $ref: "#/components/schemas/SocialHistory"
+        vitals:
+          $ref: "#/components/schemas/Vitals"
         updatedAt:
           type: string
       required:
@@ -365,16 +481,26 @@ components:
         - firstName
         - lastName
         - dateOfBirth
-        - gender
+        - biologicalSex
+        - genderIdentity
+        - preferredLanguage
+        - maritalStatus
+        - bloodType
         - phone
         - email
         - address
+        - careTeam
         - insurance
+        - insuranceSecondary
         - emergencyContact
         - allergies
         - medications
         - conditions
         - surgeries
+        - immunizations
+        - familyHistory
+        - socialHistory
+        - vitals
         - updatedAt
 
     PatientInput:
@@ -386,7 +512,15 @@ components:
           type: string
         dateOfBirth:
           type: string
-        gender:
+        biologicalSex:
+          type: string
+        genderIdentity:
+          type: string
+        preferredLanguage:
+          type: string
+        maritalStatus:
+          type: string
+        bloodType:
           type: string
         phone:
           type: string
@@ -394,8 +528,14 @@ components:
           type: string
         address:
           type: string
+        careTeam:
+          $ref: "#/components/schemas/CareTeam"
         insurance:
           $ref: "#/components/schemas/Insurance"
+        insuranceSecondary:
+          oneOf:
+            - $ref: "#/components/schemas/Insurance"
+            - type: "null"
         emergencyContact:
           $ref: "#/components/schemas/EmergencyContact"
         allergies:
@@ -414,20 +554,42 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Surgery"
+        immunizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Immunization"
+        familyHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/FamilyHistoryEntry"
+        socialHistory:
+          $ref: "#/components/schemas/SocialHistory"
+        vitals:
+          $ref: "#/components/schemas/Vitals"
       required:
         - firstName
         - lastName
         - dateOfBirth
-        - gender
+        - biologicalSex
+        - genderIdentity
+        - preferredLanguage
+        - maritalStatus
+        - bloodType
         - phone
         - email
         - address
+        - careTeam
         - insurance
+        - insuranceSecondary
         - emergencyContact
         - allergies
         - medications
         - conditions
         - surgeries
+        - immunizations
+        - familyHistory
+        - socialHistory
+        - vitals
 
     CodeRequest:
       type: object

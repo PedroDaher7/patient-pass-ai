@@ -6,11 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Medication {
-  name: string;
-  dose: string;
-  frequency: string;
-  route: string;
-  prescriber: string;
-  reason: string;
+export interface Immunization {
+  vaccine: string;
+  date: string;
 }

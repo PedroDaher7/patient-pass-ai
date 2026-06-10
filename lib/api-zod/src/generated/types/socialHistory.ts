@@ -6,11 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Medication {
-  name: string;
-  dose: string;
-  frequency: string;
-  route: string;
-  prescriber: string;
-  reason: string;
+export interface SocialHistory {
+  smoking: string;
+  alcohol: string;
+  occupation: string;
+  exercise: string;
 }

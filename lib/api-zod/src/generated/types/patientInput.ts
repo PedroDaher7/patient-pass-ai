@@ -6,24 +6,39 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Allergy } from './allergy';
+import type { CareTeam } from './careTeam';
 import type { Condition } from './condition';
 import type { EmergencyContact } from './emergencyContact';
+import type { FamilyHistoryEntry } from './familyHistoryEntry';
+import type { Immunization } from './immunization';
 import type { Insurance } from './insurance';
 import type { Medication } from './medication';
+import type { SocialHistory } from './socialHistory';
 import type { Surgery } from './surgery';
+import type { Vitals } from './vitals';
 
 export interface PatientInput {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender: string;
+  biologicalSex: string;
+  genderIdentity: string;
+  preferredLanguage: string;
+  maritalStatus: string;
+  bloodType: string;
   phone: string;
   email: string;
   address: string;
+  careTeam: CareTeam;
   insurance: Insurance;
+  insuranceSecondary: Insurance | null;
   emergencyContact: EmergencyContact;
   allergies: Allergy[];
   medications: Medication[];
   conditions: Condition[];
   surgeries: Surgery[];
+  immunizations: Immunization[];
+  familyHistory: FamilyHistoryEntry[];
+  socialHistory: SocialHistory;
+  vitals: Vitals;
 }

@@ -8,6 +8,6 @@
 
 export interface Allergy {
   name: string;
-  severity: string;
   reaction: string;
+  severity: string;
 }

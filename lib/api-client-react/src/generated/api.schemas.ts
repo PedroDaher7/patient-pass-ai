@@ -11,27 +11,29 @@ export interface HealthStatus {
 
 export interface ErrorResponse {
   error: string;
-  /** Machine-readable error kind (CODE_NOT_FOUND, CODE_EXPIRED, CODE_REVOKED, PATIENT_NOT_FOUND) */
   errorCode: string;
 }
 
 export interface Allergy {
   name: string;
-  severity: string;
   reaction: string;
+  severity: string;
 }
 
 export interface Medication {
   name: string;
   dose: string;
   frequency: string;
+  route: string;
   prescriber: string;
+  reason: string;
 }
 
 export interface Condition {
   name: string;
   /** @nullable */
   diagnosedDate: string | null;
+  status: string;
   /** @nullable */
   notes: string | null;
 }
@@ -41,15 +43,40 @@ export interface Surgery {
   /** @nullable */
   date: string | null;
   /** @nullable */
-  hospital: string | null;
-  /** @nullable */
-  notes: string | null;
+  facility: string | null;
+}
+
+export interface Immunization {
+  vaccine: string;
+  date: string;
+}
+
+export interface FamilyHistoryEntry {
+  relation: string;
+  condition: string;
+}
+
+export interface SocialHistory {
+  smoking: string;
+  alcohol: string;
+  occupation: string;
+  exercise: string;
+}
+
+export interface CareTeam {
+  pcp: string;
+  referringPhysician: string;
+  visitSpecialty: string;
+  reasonForVisit: string;
+  preferredPharmacy: string;
+  pharmacyPhone: string;
 }
 
 export interface Insurance {
   plan: string;
   memberId: string;
   group: string;
+  policyholder: string;
   phone: string;
 }
 
@@ -59,21 +86,39 @@ export interface EmergencyContact {
   phone: string;
 }
 
+export interface Vitals {
+  heightFt: string;
+  heightIn: string;
+  weightLbs: string;
+  systolic: string;
+  diastolic: string;
+}
+
 export interface Patient {
   id: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender: string;
+  biologicalSex: string;
+  genderIdentity: string;
+  preferredLanguage: string;
+  maritalStatus: string;
+  bloodType: string;
   phone: string;
   email: string;
   address: string;
+  careTeam: CareTeam;
   insurance: Insurance;
+  insuranceSecondary: Insurance | null;
   emergencyContact: EmergencyContact;
   allergies: Allergy[];
   medications: Medication[];
   conditions: Condition[];
   surgeries: Surgery[];
+  immunizations: Immunization[];
+  familyHistory: FamilyHistoryEntry[];
+  socialHistory: SocialHistory;
+  vitals: Vitals;
   updatedAt: string;
 }
 
@@ -81,16 +126,26 @@ export interface PatientInput {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender: string;
+  biologicalSex: string;
+  genderIdentity: string;
+  preferredLanguage: string;
+  maritalStatus: string;
+  bloodType: string;
   phone: string;
   email: string;
   address: string;
+  careTeam: CareTeam;
   insurance: Insurance;
+  insuranceSecondary: Insurance | null;
   emergencyContact: EmergencyContact;
   allergies: Allergy[];
   medications: Medication[];
   conditions: Condition[];
   surgeries: Surgery[];
+  immunizations: Immunization[];
+  familyHistory: FamilyHistoryEntry[];
+  socialHistory: SocialHistory;
+  vitals: Vitals;
 }
 
 export interface CodeRequest {

@@ -28,16 +28,36 @@ export const GetPatientResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "dateOfBirth": zod.string(),
-  "gender": zod.string(),
+  "biologicalSex": zod.string(),
+  "genderIdentity": zod.string(),
+  "preferredLanguage": zod.string(),
+  "maritalStatus": zod.string(),
+  "bloodType": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
+  "careTeam": zod.object({
+  "pcp": zod.string(),
+  "referringPhysician": zod.string(),
+  "visitSpecialty": zod.string(),
+  "reasonForVisit": zod.string(),
+  "preferredPharmacy": zod.string(),
+  "pharmacyPhone": zod.string()
+}),
   "insurance": zod.object({
   "plan": zod.string(),
   "memberId": zod.string(),
   "group": zod.string(),
+  "policyholder": zod.string(),
   "phone": zod.string()
 }),
+  "insuranceSecondary": zod.union([zod.object({
+  "plan": zod.string(),
+  "memberId": zod.string(),
+  "group": zod.string(),
+  "policyholder": zod.string(),
+  "phone": zod.string()
+}),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
   "relationship": zod.string(),
@@ -45,26 +65,49 @@ export const GetPatientResponse = zod.object({
 }),
   "allergies": zod.array(zod.object({
   "name": zod.string(),
-  "severity": zod.string(),
-  "reaction": zod.string()
+  "reaction": zod.string(),
+  "severity": zod.string()
 })),
   "medications": zod.array(zod.object({
   "name": zod.string(),
   "dose": zod.string(),
   "frequency": zod.string(),
-  "prescriber": zod.string()
+  "route": zod.string(),
+  "prescriber": zod.string(),
+  "reason": zod.string()
 })),
   "conditions": zod.array(zod.object({
   "name": zod.string(),
   "diagnosedDate": zod.string().nullable(),
+  "status": zod.string(),
   "notes": zod.string().nullable()
 })),
   "surgeries": zod.array(zod.object({
   "procedure": zod.string(),
   "date": zod.string().nullable(),
-  "hospital": zod.string().nullable(),
-  "notes": zod.string().nullable()
+  "facility": zod.string().nullable()
 })),
+  "immunizations": zod.array(zod.object({
+  "vaccine": zod.string(),
+  "date": zod.string()
+})),
+  "familyHistory": zod.array(zod.object({
+  "relation": zod.string(),
+  "condition": zod.string()
+})),
+  "socialHistory": zod.object({
+  "smoking": zod.string(),
+  "alcohol": zod.string(),
+  "occupation": zod.string(),
+  "exercise": zod.string()
+}),
+  "vitals": zod.object({
+  "heightFt": zod.string(),
+  "heightIn": zod.string(),
+  "weightLbs": zod.string(),
+  "systolic": zod.string(),
+  "diastolic": zod.string()
+}),
   "updatedAt": zod.string()
 })
 
@@ -80,16 +123,36 @@ export const UpdatePatientBody = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "dateOfBirth": zod.string(),
-  "gender": zod.string(),
+  "biologicalSex": zod.string(),
+  "genderIdentity": zod.string(),
+  "preferredLanguage": zod.string(),
+  "maritalStatus": zod.string(),
+  "bloodType": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
+  "careTeam": zod.object({
+  "pcp": zod.string(),
+  "referringPhysician": zod.string(),
+  "visitSpecialty": zod.string(),
+  "reasonForVisit": zod.string(),
+  "preferredPharmacy": zod.string(),
+  "pharmacyPhone": zod.string()
+}),
   "insurance": zod.object({
   "plan": zod.string(),
   "memberId": zod.string(),
   "group": zod.string(),
+  "policyholder": zod.string(),
   "phone": zod.string()
 }),
+  "insuranceSecondary": zod.union([zod.object({
+  "plan": zod.string(),
+  "memberId": zod.string(),
+  "group": zod.string(),
+  "policyholder": zod.string(),
+  "phone": zod.string()
+}),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
   "relationship": zod.string(),
@@ -97,26 +160,49 @@ export const UpdatePatientBody = zod.object({
 }),
   "allergies": zod.array(zod.object({
   "name": zod.string(),
-  "severity": zod.string(),
-  "reaction": zod.string()
+  "reaction": zod.string(),
+  "severity": zod.string()
 })),
   "medications": zod.array(zod.object({
   "name": zod.string(),
   "dose": zod.string(),
   "frequency": zod.string(),
-  "prescriber": zod.string()
+  "route": zod.string(),
+  "prescriber": zod.string(),
+  "reason": zod.string()
 })),
   "conditions": zod.array(zod.object({
   "name": zod.string(),
   "diagnosedDate": zod.string().nullable(),
+  "status": zod.string(),
   "notes": zod.string().nullable()
 })),
   "surgeries": zod.array(zod.object({
   "procedure": zod.string(),
   "date": zod.string().nullable(),
-  "hospital": zod.string().nullable(),
-  "notes": zod.string().nullable()
-}))
+  "facility": zod.string().nullable()
+})),
+  "immunizations": zod.array(zod.object({
+  "vaccine": zod.string(),
+  "date": zod.string()
+})),
+  "familyHistory": zod.array(zod.object({
+  "relation": zod.string(),
+  "condition": zod.string()
+})),
+  "socialHistory": zod.object({
+  "smoking": zod.string(),
+  "alcohol": zod.string(),
+  "occupation": zod.string(),
+  "exercise": zod.string()
+}),
+  "vitals": zod.object({
+  "heightFt": zod.string(),
+  "heightIn": zod.string(),
+  "weightLbs": zod.string(),
+  "systolic": zod.string(),
+  "diastolic": zod.string()
+})
 })
 
 export const UpdatePatientResponse = zod.object({
@@ -124,16 +210,36 @@ export const UpdatePatientResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "dateOfBirth": zod.string(),
-  "gender": zod.string(),
+  "biologicalSex": zod.string(),
+  "genderIdentity": zod.string(),
+  "preferredLanguage": zod.string(),
+  "maritalStatus": zod.string(),
+  "bloodType": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
+  "careTeam": zod.object({
+  "pcp": zod.string(),
+  "referringPhysician": zod.string(),
+  "visitSpecialty": zod.string(),
+  "reasonForVisit": zod.string(),
+  "preferredPharmacy": zod.string(),
+  "pharmacyPhone": zod.string()
+}),
   "insurance": zod.object({
   "plan": zod.string(),
   "memberId": zod.string(),
   "group": zod.string(),
+  "policyholder": zod.string(),
   "phone": zod.string()
 }),
+  "insuranceSecondary": zod.union([zod.object({
+  "plan": zod.string(),
+  "memberId": zod.string(),
+  "group": zod.string(),
+  "policyholder": zod.string(),
+  "phone": zod.string()
+}),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
   "relationship": zod.string(),
@@ -141,26 +247,49 @@ export const UpdatePatientResponse = zod.object({
 }),
   "allergies": zod.array(zod.object({
   "name": zod.string(),
-  "severity": zod.string(),
-  "reaction": zod.string()
+  "reaction": zod.string(),
+  "severity": zod.string()
 })),
   "medications": zod.array(zod.object({
   "name": zod.string(),
   "dose": zod.string(),
   "frequency": zod.string(),
-  "prescriber": zod.string()
+  "route": zod.string(),
+  "prescriber": zod.string(),
+  "reason": zod.string()
 })),
   "conditions": zod.array(zod.object({
   "name": zod.string(),
   "diagnosedDate": zod.string().nullable(),
+  "status": zod.string(),
   "notes": zod.string().nullable()
 })),
   "surgeries": zod.array(zod.object({
   "procedure": zod.string(),
   "date": zod.string().nullable(),
-  "hospital": zod.string().nullable(),
-  "notes": zod.string().nullable()
+  "facility": zod.string().nullable()
 })),
+  "immunizations": zod.array(zod.object({
+  "vaccine": zod.string(),
+  "date": zod.string()
+})),
+  "familyHistory": zod.array(zod.object({
+  "relation": zod.string(),
+  "condition": zod.string()
+})),
+  "socialHistory": zod.object({
+  "smoking": zod.string(),
+  "alcohol": zod.string(),
+  "occupation": zod.string(),
+  "exercise": zod.string()
+}),
+  "vitals": zod.object({
+  "heightFt": zod.string(),
+  "heightIn": zod.string(),
+  "weightLbs": zod.string(),
+  "systolic": zod.string(),
+  "diastolic": zod.string()
+}),
   "updatedAt": zod.string()
 })
 
@@ -218,16 +347,36 @@ export const ValidateCodeResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "dateOfBirth": zod.string(),
-  "gender": zod.string(),
+  "biologicalSex": zod.string(),
+  "genderIdentity": zod.string(),
+  "preferredLanguage": zod.string(),
+  "maritalStatus": zod.string(),
+  "bloodType": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
+  "careTeam": zod.object({
+  "pcp": zod.string(),
+  "referringPhysician": zod.string(),
+  "visitSpecialty": zod.string(),
+  "reasonForVisit": zod.string(),
+  "preferredPharmacy": zod.string(),
+  "pharmacyPhone": zod.string()
+}),
   "insurance": zod.object({
   "plan": zod.string(),
   "memberId": zod.string(),
   "group": zod.string(),
+  "policyholder": zod.string(),
   "phone": zod.string()
 }),
+  "insuranceSecondary": zod.union([zod.object({
+  "plan": zod.string(),
+  "memberId": zod.string(),
+  "group": zod.string(),
+  "policyholder": zod.string(),
+  "phone": zod.string()
+}),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
   "relationship": zod.string(),
@@ -235,26 +384,49 @@ export const ValidateCodeResponse = zod.object({
 }),
   "allergies": zod.array(zod.object({
   "name": zod.string(),
-  "severity": zod.string(),
-  "reaction": zod.string()
+  "reaction": zod.string(),
+  "severity": zod.string()
 })),
   "medications": zod.array(zod.object({
   "name": zod.string(),
   "dose": zod.string(),
   "frequency": zod.string(),
-  "prescriber": zod.string()
+  "route": zod.string(),
+  "prescriber": zod.string(),
+  "reason": zod.string()
 })),
   "conditions": zod.array(zod.object({
   "name": zod.string(),
   "diagnosedDate": zod.string().nullable(),
+  "status": zod.string(),
   "notes": zod.string().nullable()
 })),
   "surgeries": zod.array(zod.object({
   "procedure": zod.string(),
   "date": zod.string().nullable(),
-  "hospital": zod.string().nullable(),
-  "notes": zod.string().nullable()
+  "facility": zod.string().nullable()
 })),
+  "immunizations": zod.array(zod.object({
+  "vaccine": zod.string(),
+  "date": zod.string()
+})),
+  "familyHistory": zod.array(zod.object({
+  "relation": zod.string(),
+  "condition": zod.string()
+})),
+  "socialHistory": zod.object({
+  "smoking": zod.string(),
+  "alcohol": zod.string(),
+  "occupation": zod.string(),
+  "exercise": zod.string()
+}),
+  "vitals": zod.object({
+  "heightFt": zod.string(),
+  "heightIn": zod.string(),
+  "weightLbs": zod.string(),
+  "systolic": zod.string(),
+  "diastolic": zod.string()
+}),
   "updatedAt": zod.string()
 }),
   "expiresAt": zod.string()

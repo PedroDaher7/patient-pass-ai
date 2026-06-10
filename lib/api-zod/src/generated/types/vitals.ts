@@ -6,11 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Medication {
-  name: string;
-  dose: string;
-  frequency: string;
-  route: string;
-  prescriber: string;
-  reason: string;
+export interface Vitals {
+  heightFt: string;
+  heightIn: string;
+  weightLbs: string;
+  systolic: string;
+  diastolic: string;
 }

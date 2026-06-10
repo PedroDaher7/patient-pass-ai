@@ -10,6 +10,7 @@ export interface Condition {
   name: string;
   /** @nullable */
   diagnosedDate: string | null;
+  status: string;
   /** @nullable */
   notes: string | null;
 }

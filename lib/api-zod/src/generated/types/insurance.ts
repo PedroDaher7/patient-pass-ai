@@ -10,5 +10,6 @@ export interface Insurance {
   plan: string;
   memberId: string;
   group: string;
+  policyholder: string;
   phone: string;
 }

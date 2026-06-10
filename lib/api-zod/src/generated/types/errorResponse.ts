@@ -8,6 +8,5 @@
 
 export interface ErrorResponse {
   error: string;
-  /** Machine-readable error kind (CODE_NOT_FOUND, CODE_EXPIRED, CODE_REVOKED, PATIENT_NOT_FOUND) */
   errorCode: string;
 }
