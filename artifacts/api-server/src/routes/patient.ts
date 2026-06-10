@@ -15,7 +15,16 @@ import {
 
 const router: IRouter = Router();
 
+type RawConsent = { agreed?: boolean; date?: string; signature?: string };
+type RawConsents = { hipaa?: RawConsent; consentToTreat?: RawConsent; billingPolicy?: RawConsent; releaseInfo?: RawConsent; telehealth?: RawConsent };
+type RawROS = { constitutional?: Record<string, string>; cardiovascular?: Record<string, string>; respiratory?: Record<string, string>; gastrointestinal?: Record<string, string>; neurological?: Record<string, string>; musculoskeletal?: Record<string, string>; skin?: Record<string, string>; psychiatric?: Record<string, string> };
+
+function defaultConsent() { return { agreed: false, date: "", signature: "" }; }
+
 function serializePatient(p: typeof patientsTable.$inferSelect) {
+  const rawConsents = (p.consents as RawConsents) ?? {};
+  const rawROS = (p.reviewOfSystems as RawROS) ?? {};
+
   return {
     id: p.id,
     firstName: p.firstName,
@@ -23,24 +32,51 @@ function serializePatient(p: typeof patientsTable.$inferSelect) {
     dateOfBirth: p.dateOfBirth,
     biologicalSex: p.biologicalSex,
     genderIdentity: p.genderIdentity,
+    preferredName: p.preferredName,
+    pronouns: p.pronouns,
     preferredLanguage: p.preferredLanguage,
     maritalStatus: p.maritalStatus,
     bloodType: p.bloodType,
+    ssnLastFour: p.ssnLastFour,
+    race: p.race,
+    ethnicity: p.ethnicity,
+    interpreterNeeded: p.interpreterNeeded,
     phone: p.phone,
     email: p.email,
     address: p.address,
     careTeam: p.careTeam as Record<string, string>,
     insurance: p.insurance as Record<string, string>,
     insuranceSecondary: (p.insuranceSecondary ?? null) as Record<string, string> | null,
+    responsibleParty: (p.responsibleParty ?? null) as Record<string, string> | null,
     emergencyContact: p.emergencyContact as Record<string, string>,
     allergies: p.allergies as Record<string, string>[],
     medications: p.medications as Record<string, string>[],
     conditions: p.conditions as Record<string, string>[],
     surgeries: p.surgeries as Record<string, string>[],
+    hospitalizations: p.hospitalizations as Record<string, string>[],
     immunizations: p.immunizations as Record<string, string>[],
     familyHistory: p.familyHistory as Record<string, string>[],
     socialHistory: p.socialHistory as Record<string, string>,
     vitals: p.vitals as Record<string, string>,
+    reviewOfSystems: {
+      constitutional: rawROS.constitutional ?? {},
+      cardiovascular: rawROS.cardiovascular ?? {},
+      respiratory: rawROS.respiratory ?? {},
+      gastrointestinal: rawROS.gastrointestinal ?? {},
+      neurological: rawROS.neurological ?? {},
+      musculoskeletal: rawROS.musculoskeletal ?? {},
+      skin: rawROS.skin ?? {},
+      psychiatric: rawROS.psychiatric ?? {},
+    },
+    obgynHistory: (p.obgynHistory ?? null) as Record<string, string> | null,
+    consents: {
+      hipaa: rawConsents.hipaa ?? defaultConsent(),
+      consentToTreat: rawConsents.consentToTreat ?? defaultConsent(),
+      billingPolicy: rawConsents.billingPolicy ?? defaultConsent(),
+      releaseInfo: rawConsents.releaseInfo ?? defaultConsent(),
+      telehealth: rawConsents.telehealth ?? defaultConsent(),
+    },
+    signature: (p.signature ?? null) as Record<string, string> | null,
     updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : String(p.updatedAt),
   };
 }

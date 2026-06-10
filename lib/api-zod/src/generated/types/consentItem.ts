@@ -6,10 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SocialHistory {
-  smoking: string;
-  alcohol: string;
-  occupation: string;
-  employer: string;
-  exercise: string;
+export interface ConsentItem {
+  agreed: boolean;
+  date: string;
+  signature: string;
 }

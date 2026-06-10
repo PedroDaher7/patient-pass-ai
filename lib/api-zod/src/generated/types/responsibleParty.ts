@@ -6,10 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SocialHistory {
-  smoking: string;
-  alcohol: string;
-  occupation: string;
+export interface ResponsibleParty {
+  name: string;
+  relationship: string;
+  dob: string;
+  phone: string;
+  address: string;
   employer: string;
-  exercise: string;
 }

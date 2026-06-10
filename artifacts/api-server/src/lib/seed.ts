@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm";
 import { db, patientsTable } from "@workspace/db";
 import { logger } from "./logger";
 
+const TODAY = "2026-06-10";
+
 const DEMO_PATIENT = {
   id: "demo",
   firstName: "Maria",
@@ -9,9 +11,15 @@ const DEMO_PATIENT = {
   dateOfBirth: "1972-03-15",
   biologicalSex: "Female",
   genderIdentity: "Woman",
+  preferredName: "Maria",
+  pronouns: "She/Her",
   preferredLanguage: "English",
   maritalStatus: "Married",
   bloodType: "O+",
+  ssnLastFour: "4471",
+  race: "Hispanic or Latino",
+  ethnicity: "Mexican American",
+  interpreterNeeded: "No",
   phone: "(512) 823-4471",
   email: "maria.lopez@email.com",
   address: "247 Maple Street, Austin, TX 78701",
@@ -20,7 +28,8 @@ const DEMO_PATIENT = {
     referringPhysician: "Dr. Ramesh Patel, MD",
     visitSpecialty: "Endocrinology",
     reasonForVisit: "Type 2 diabetes management follow-up; HbA1c review and medication adjustment",
-    preferredPharmacy: "HEB Pharmacy #47 — 1825 S Congress Ave, Austin TX 78704",
+    preferredPharmacy: "HEB Pharmacy #47",
+    pharmacyAddress: "1825 S Congress Ave, Austin TX 78704",
     pharmacyPhone: "(512) 444-7890",
   },
   insurance: {
@@ -28,6 +37,8 @@ const DEMO_PATIENT = {
     memberId: "BCBS-7743219-TX",
     group: "GRP-45892",
     policyholder: "Maria E. Lopez",
+    policyholderDob: "1972-03-15",
+    policyholderRelationship: "Self",
     phone: "(800) 521-2227",
   },
   insuranceSecondary: {
@@ -35,7 +46,17 @@ const DEMO_PATIENT = {
     memberId: "1EG4-TE5-MK72",
     group: "N/A",
     policyholder: "Maria E. Lopez",
+    policyholderDob: "1972-03-15",
+    policyholderRelationship: "Self",
     phone: "(800) 633-4227",
+  },
+  responsibleParty: {
+    name: "Maria E. Lopez",
+    relationship: "Self",
+    dob: "1972-03-15",
+    phone: "(512) 823-4471",
+    address: "247 Maple Street, Austin, TX 78701",
+    employer: "Austin Independent School District",
   },
   emergencyContact: {
     name: "Carlos Alberto Lopez",
@@ -132,6 +153,23 @@ const DEMO_PATIENT = {
       facility: "Seton Medical Center, Austin TX",
     },
   ],
+  hospitalizations: [
+    {
+      reason: "Cholecystectomy — gallbladder removal",
+      date: "2019-08-12",
+      facility: "St. David's Medical Center, Austin TX",
+    },
+    {
+      reason: "Cesarean Section — delivery of son Miguel",
+      date: "2001-05-19",
+      facility: "Seton Medical Center, Austin TX",
+    },
+    {
+      reason: "Gestational diabetes — inpatient monitoring",
+      date: "2001-04-10",
+      facility: "Seton Medical Center, Austin TX",
+    },
+  ],
   immunizations: [
     { vaccine: "COVID-19 (mRNA Bivalent Booster)", date: "2023-10-12" },
     { vaccine: "Influenza (Flu Shot)", date: "2025-10-02" },
@@ -151,7 +189,8 @@ const DEMO_PATIENT = {
   socialHistory: {
     smoking: "Former smoker — quit 2010; ~5 pack-year history",
     alcohol: "Social drinker — 1–2 drinks per week",
-    occupation: "High school biology teacher, Austin ISD",
+    occupation: "High school biology teacher",
+    employer: "Austin Independent School District",
     exercise: "Moderate — 30-min walks 3×/week; mostly sedentary at work",
   },
   vitals: {
@@ -161,7 +200,106 @@ const DEMO_PATIENT = {
     systolic: "128",
     diastolic: "82",
   },
+  reviewOfSystems: {
+    constitutional: {
+      "Fever": "Denied",
+      "Fatigue": "Present",
+      "Night sweats": "Denied",
+      "Unexplained weight loss": "Denied",
+      "Weight gain": "Present",
+      "Chills": "Denied",
+    },
+    cardiovascular: {
+      "Chest pain": "Denied",
+      "Palpitations": "Denied",
+      "Shortness of breath on exertion": "Denied",
+      "Lower extremity edema": "Denied",
+      "Orthopnea": "Denied",
+    },
+    respiratory: {
+      "Cough": "Denied",
+      "Wheezing": "Denied",
+      "Shortness of breath at rest": "Denied",
+      "Hemoptysis": "Denied",
+    },
+    gastrointestinal: {
+      "Nausea": "Denied",
+      "Vomiting": "Denied",
+      "Diarrhea": "Denied",
+      "Constipation": "Denied",
+      "Abdominal pain": "Denied",
+      "Heartburn / GERD": "Present",
+    },
+    neurological: {
+      "Headaches": "Present",
+      "Dizziness": "Denied",
+      "Numbness or tingling": "Denied",
+      "Seizures": "Denied",
+      "Memory changes": "Denied",
+    },
+    musculoskeletal: {
+      "Joint pain": "Denied",
+      "Muscle weakness": "Denied",
+      "Back pain": "Present",
+      "Morning stiffness": "Denied",
+    },
+    skin: {
+      "Rash": "Denied",
+      "Itching": "Denied",
+      "Hair loss": "Denied",
+      "Wound healing changes": "Denied",
+    },
+    psychiatric: {
+      "Depression": "Denied",
+      "Anxiety": "Present",
+      "Insomnia": "Present",
+      "Suicidal ideation": "Denied",
+    },
+  },
+  obgynHistory: {
+    lmp: "2023-11-15",
+    pregnancies: "2",
+    deliveries: "1",
+    miscarriages: "1",
+    abortions: "0",
+    liveBirths: "1",
+  },
+  consents: {
+    hipaa: {
+      agreed: true,
+      date: TODAY,
+      signature: "Maria Lopez",
+    },
+    consentToTreat: {
+      agreed: true,
+      date: TODAY,
+      signature: "Maria Lopez",
+    },
+    billingPolicy: {
+      agreed: true,
+      date: TODAY,
+      signature: "Maria Lopez",
+    },
+    releaseInfo: {
+      agreed: true,
+      date: TODAY,
+      signature: "Maria Lopez",
+    },
+    telehealth: {
+      agreed: true,
+      date: TODAY,
+      signature: "Maria Lopez",
+    },
+  },
+  signature: {
+    mode: "typed",
+    text: "Maria Lopez",
+    dataUrl: "",
+    date: TODAY,
+  },
 };
+
+export { DEMO_PATIENT };
 
 export async function seedDemoPatient(): Promise<void> {
   try {

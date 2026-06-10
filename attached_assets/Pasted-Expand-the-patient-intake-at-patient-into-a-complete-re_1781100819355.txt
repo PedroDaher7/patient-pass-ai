@@ -1,0 +1,19 @@
+Expand the patient intake at /patient into a complete, realistic new-patient registration packet modeled on the forms medical practices actually use. Keep the existing sections and add the following, all pre-filled with realistic dummy data for Maria Lopez and all fully editable inline for testing:
+
+Patient registration: preferred name, pronouns, SSN last four, employer and occupation, preferred language and whether an interpreter is needed, race and ethnicity.
+
+Pharmacy: preferred pharmacy name, address, and phone.
+
+Insurance and billing: primary carrier, member ID, group number, policyholder name, relationship to patient, and policyholder date of birth; an optional secondary insurance; and a responsible party or guarantor. Include labeled placeholder upload tiles for a photo ID and the front and back of the insurance card (no real upload, just placeholders).
+
+Review of systems: a checklist grouped by body system (constitutional, cardiovascular, respiratory, gastrointestinal, neurological, musculoskeletal, skin, psychiatric) where each symptom is marked present or denied. Pre-fill a realistic mix for Maria.
+
+Hospitalizations: a list with reason, date, and facility.
+
+OB/GYN history: a short section (last menstrual period, number of pregnancies) shown when relevant.
+
+Consents and acknowledgments: a dedicated section with the standard forms a practice collects: HIPAA Notice of Privacy Practices acknowledgment, Consent to Treat, Financial and Billing Policy, Authorization to Release Information, and Telehealth Consent. Each shows a short summary line, an agree checkbox, the date, and a signature.
+
+Signature: add a signature block where the patient signs. For the demo, pre-populate a styled cursive dummy signature reading "Maria Lopez" with today's date, and include a "Clear and re-sign" option using a simple draw-to-sign pad or a typed-name signature.
+
+Make every field and list item editable inline so values can be changed for testing, and add a clear "Reset to demo data" button that restores the full dummy dataset.

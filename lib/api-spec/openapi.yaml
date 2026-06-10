@@ -293,6 +293,20 @@ components:
         - date
         - facility
 
+    Hospitalization:
+      type: object
+      properties:
+        reason:
+          type: string
+        date:
+          type: string
+        facility:
+          type: string
+      required:
+        - reason
+        - date
+        - facility
+
     Immunization:
       type: object
       properties:
@@ -324,12 +338,15 @@ components:
           type: string
         occupation:
           type: string
+        employer:
+          type: string
         exercise:
           type: string
       required:
         - smoking
         - alcohol
         - occupation
+        - employer
         - exercise
 
     CareTeam:
@@ -345,6 +362,8 @@ components:
           type: string
         preferredPharmacy:
           type: string
+        pharmacyAddress:
+          type: string
         pharmacyPhone:
           type: string
       required:
@@ -353,6 +372,7 @@ components:
         - visitSpecialty
         - reasonForVisit
         - preferredPharmacy
+        - pharmacyAddress
         - pharmacyPhone
 
     Insurance:
@@ -366,6 +386,10 @@ components:
           type: string
         policyholder:
           type: string
+        policyholderDob:
+          type: string
+        policyholderRelationship:
+          type: string
         phone:
           type: string
       required:
@@ -373,6 +397,8 @@ components:
         - memberId
         - group
         - policyholder
+        - policyholderDob
+        - policyholderRelationship
         - phone
 
     EmergencyContact:
@@ -388,6 +414,29 @@ components:
         - name
         - relationship
         - phone
+
+    ResponsibleParty:
+      type: object
+      properties:
+        name:
+          type: string
+        relationship:
+          type: string
+        dob:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        employer:
+          type: string
+      required:
+        - name
+        - relationship
+        - dob
+        - phone
+        - address
+        - employer
 
     Vitals:
       type: object
@@ -409,6 +458,114 @@ components:
         - systolic
         - diastolic
 
+    ReviewOfSystemsBody:
+      type: object
+      additionalProperties:
+        type: string
+
+    ReviewOfSystems:
+      type: object
+      properties:
+        constitutional:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        cardiovascular:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        respiratory:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        gastrointestinal:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        neurological:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        musculoskeletal:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        skin:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+        psychiatric:
+          $ref: "#/components/schemas/ReviewOfSystemsBody"
+      required:
+        - constitutional
+        - cardiovascular
+        - respiratory
+        - gastrointestinal
+        - neurological
+        - musculoskeletal
+        - skin
+        - psychiatric
+
+    ObgynHistory:
+      type: object
+      properties:
+        lmp:
+          type: string
+        pregnancies:
+          type: string
+        deliveries:
+          type: string
+        miscarriages:
+          type: string
+        abortions:
+          type: string
+        liveBirths:
+          type: string
+      required:
+        - lmp
+        - pregnancies
+        - deliveries
+        - miscarriages
+        - abortions
+        - liveBirths
+
+    ConsentItem:
+      type: object
+      properties:
+        agreed:
+          type: boolean
+        date:
+          type: string
+        signature:
+          type: string
+      required:
+        - agreed
+        - date
+        - signature
+
+    Consents:
+      type: object
+      properties:
+        hipaa:
+          $ref: "#/components/schemas/ConsentItem"
+        consentToTreat:
+          $ref: "#/components/schemas/ConsentItem"
+        billingPolicy:
+          $ref: "#/components/schemas/ConsentItem"
+        releaseInfo:
+          $ref: "#/components/schemas/ConsentItem"
+        telehealth:
+          $ref: "#/components/schemas/ConsentItem"
+      required:
+        - hipaa
+        - consentToTreat
+        - billingPolicy
+        - releaseInfo
+        - telehealth
+
+    PatientSignature:
+      type: object
+      properties:
+        mode:
+          type: string
+        text:
+          type: string
+        dataUrl:
+          type: string
+        date:
+          type: string
+      required:
+        - mode
+        - text
+        - dataUrl
+        - date
+
     Patient:
       type: object
       properties:
@@ -424,11 +581,23 @@ components:
           type: string
         genderIdentity:
           type: string
+        preferredName:
+          type: string
+        pronouns:
+          type: string
         preferredLanguage:
           type: string
         maritalStatus:
           type: string
         bloodType:
+          type: string
+        ssnLastFour:
+          type: string
+        race:
+          type: string
+        ethnicity:
+          type: string
+        interpreterNeeded:
           type: string
         phone:
           type: string
@@ -443,6 +612,10 @@ components:
         insuranceSecondary:
           oneOf:
             - $ref: "#/components/schemas/Insurance"
+            - type: "null"
+        responsibleParty:
+          oneOf:
+            - $ref: "#/components/schemas/ResponsibleParty"
             - type: "null"
         emergencyContact:
           $ref: "#/components/schemas/EmergencyContact"
@@ -462,6 +635,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Surgery"
+        hospitalizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hospitalization"
         immunizations:
           type: array
           items:
@@ -474,6 +651,18 @@ components:
           $ref: "#/components/schemas/SocialHistory"
         vitals:
           $ref: "#/components/schemas/Vitals"
+        reviewOfSystems:
+          $ref: "#/components/schemas/ReviewOfSystems"
+        obgynHistory:
+          oneOf:
+            - $ref: "#/components/schemas/ObgynHistory"
+            - type: "null"
+        consents:
+          $ref: "#/components/schemas/Consents"
+        signature:
+          oneOf:
+            - $ref: "#/components/schemas/PatientSignature"
+            - type: "null"
         updatedAt:
           type: string
       required:
@@ -483,24 +672,36 @@ components:
         - dateOfBirth
         - biologicalSex
         - genderIdentity
+        - preferredName
+        - pronouns
         - preferredLanguage
         - maritalStatus
         - bloodType
+        - ssnLastFour
+        - race
+        - ethnicity
+        - interpreterNeeded
         - phone
         - email
         - address
         - careTeam
         - insurance
         - insuranceSecondary
+        - responsibleParty
         - emergencyContact
         - allergies
         - medications
         - conditions
         - surgeries
+        - hospitalizations
         - immunizations
         - familyHistory
         - socialHistory
         - vitals
+        - reviewOfSystems
+        - obgynHistory
+        - consents
+        - signature
         - updatedAt
 
     PatientInput:
@@ -516,11 +717,23 @@ components:
           type: string
         genderIdentity:
           type: string
+        preferredName:
+          type: string
+        pronouns:
+          type: string
         preferredLanguage:
           type: string
         maritalStatus:
           type: string
         bloodType:
+          type: string
+        ssnLastFour:
+          type: string
+        race:
+          type: string
+        ethnicity:
+          type: string
+        interpreterNeeded:
           type: string
         phone:
           type: string
@@ -535,6 +748,10 @@ components:
         insuranceSecondary:
           oneOf:
             - $ref: "#/components/schemas/Insurance"
+            - type: "null"
+        responsibleParty:
+          oneOf:
+            - $ref: "#/components/schemas/ResponsibleParty"
             - type: "null"
         emergencyContact:
           $ref: "#/components/schemas/EmergencyContact"
@@ -554,6 +771,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Surgery"
+        hospitalizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hospitalization"
         immunizations:
           type: array
           items:
@@ -566,30 +787,54 @@ components:
           $ref: "#/components/schemas/SocialHistory"
         vitals:
           $ref: "#/components/schemas/Vitals"
+        reviewOfSystems:
+          $ref: "#/components/schemas/ReviewOfSystems"
+        obgynHistory:
+          oneOf:
+            - $ref: "#/components/schemas/ObgynHistory"
+            - type: "null"
+        consents:
+          $ref: "#/components/schemas/Consents"
+        signature:
+          oneOf:
+            - $ref: "#/components/schemas/PatientSignature"
+            - type: "null"
       required:
         - firstName
         - lastName
         - dateOfBirth
         - biologicalSex
         - genderIdentity
+        - preferredName
+        - pronouns
         - preferredLanguage
         - maritalStatus
         - bloodType
+        - ssnLastFour
+        - race
+        - ethnicity
+        - interpreterNeeded
         - phone
         - email
         - address
         - careTeam
         - insurance
         - insuranceSecondary
+        - responsibleParty
         - emergencyContact
         - allergies
         - medications
         - conditions
         - surgeries
+        - hospitalizations
         - immunizations
         - familyHistory
         - socialHistory
         - vitals
+        - reviewOfSystems
+        - obgynHistory
+        - consents
+        - signature
 
     CodeRequest:
       type: object

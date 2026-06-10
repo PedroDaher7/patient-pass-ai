@@ -12,5 +12,6 @@ export interface CareTeam {
   visitSpecialty: string;
   reasonForVisit: string;
   preferredPharmacy: string;
+  pharmacyAddress: string;
   pharmacyPhone: string;
 }

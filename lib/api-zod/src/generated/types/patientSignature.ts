@@ -6,10 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SocialHistory {
-  smoking: string;
-  alcohol: string;
-  occupation: string;
-  employer: string;
-  exercise: string;
+export interface PatientSignature {
+  mode: string;
+  text: string;
+  dataUrl: string;
+  date: string;
 }

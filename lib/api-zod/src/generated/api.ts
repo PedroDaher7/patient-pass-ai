@@ -30,9 +30,15 @@ export const GetPatientResponse = zod.object({
   "dateOfBirth": zod.string(),
   "biologicalSex": zod.string(),
   "genderIdentity": zod.string(),
+  "preferredName": zod.string(),
+  "pronouns": zod.string(),
   "preferredLanguage": zod.string(),
   "maritalStatus": zod.string(),
   "bloodType": zod.string(),
+  "ssnLastFour": zod.string(),
+  "race": zod.string(),
+  "ethnicity": zod.string(),
+  "interpreterNeeded": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
@@ -42,6 +48,7 @@ export const GetPatientResponse = zod.object({
   "visitSpecialty": zod.string(),
   "reasonForVisit": zod.string(),
   "preferredPharmacy": zod.string(),
+  "pharmacyAddress": zod.string(),
   "pharmacyPhone": zod.string()
 }),
   "insurance": zod.object({
@@ -49,6 +56,8 @@ export const GetPatientResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
 }),
   "insuranceSecondary": zod.union([zod.object({
@@ -56,7 +65,17 @@ export const GetPatientResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
+}),zod.null()]),
+  "responsibleParty": zod.union([zod.object({
+  "name": zod.string(),
+  "relationship": zod.string(),
+  "dob": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "employer": zod.string()
 }),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
@@ -87,6 +106,11 @@ export const GetPatientResponse = zod.object({
   "date": zod.string().nullable(),
   "facility": zod.string().nullable()
 })),
+  "hospitalizations": zod.array(zod.object({
+  "reason": zod.string(),
+  "date": zod.string(),
+  "facility": zod.string()
+})),
   "immunizations": zod.array(zod.object({
   "vaccine": zod.string(),
   "date": zod.string()
@@ -99,6 +123,7 @@ export const GetPatientResponse = zod.object({
   "smoking": zod.string(),
   "alcohol": zod.string(),
   "occupation": zod.string(),
+  "employer": zod.string(),
   "exercise": zod.string()
 }),
   "vitals": zod.object({
@@ -108,6 +133,57 @@ export const GetPatientResponse = zod.object({
   "systolic": zod.string(),
   "diastolic": zod.string()
 }),
+  "reviewOfSystems": zod.object({
+  "constitutional": zod.record(zod.string(), zod.string()),
+  "cardiovascular": zod.record(zod.string(), zod.string()),
+  "respiratory": zod.record(zod.string(), zod.string()),
+  "gastrointestinal": zod.record(zod.string(), zod.string()),
+  "neurological": zod.record(zod.string(), zod.string()),
+  "musculoskeletal": zod.record(zod.string(), zod.string()),
+  "skin": zod.record(zod.string(), zod.string()),
+  "psychiatric": zod.record(zod.string(), zod.string())
+}),
+  "obgynHistory": zod.union([zod.object({
+  "lmp": zod.string(),
+  "pregnancies": zod.string(),
+  "deliveries": zod.string(),
+  "miscarriages": zod.string(),
+  "abortions": zod.string(),
+  "liveBirths": zod.string()
+}),zod.null()]),
+  "consents": zod.object({
+  "hipaa": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "consentToTreat": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "billingPolicy": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "releaseInfo": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "telehealth": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+})
+}),
+  "signature": zod.union([zod.object({
+  "mode": zod.string(),
+  "text": zod.string(),
+  "dataUrl": zod.string(),
+  "date": zod.string()
+}),zod.null()]),
   "updatedAt": zod.string()
 })
 
@@ -125,9 +201,15 @@ export const UpdatePatientBody = zod.object({
   "dateOfBirth": zod.string(),
   "biologicalSex": zod.string(),
   "genderIdentity": zod.string(),
+  "preferredName": zod.string(),
+  "pronouns": zod.string(),
   "preferredLanguage": zod.string(),
   "maritalStatus": zod.string(),
   "bloodType": zod.string(),
+  "ssnLastFour": zod.string(),
+  "race": zod.string(),
+  "ethnicity": zod.string(),
+  "interpreterNeeded": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
@@ -137,6 +219,7 @@ export const UpdatePatientBody = zod.object({
   "visitSpecialty": zod.string(),
   "reasonForVisit": zod.string(),
   "preferredPharmacy": zod.string(),
+  "pharmacyAddress": zod.string(),
   "pharmacyPhone": zod.string()
 }),
   "insurance": zod.object({
@@ -144,6 +227,8 @@ export const UpdatePatientBody = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
 }),
   "insuranceSecondary": zod.union([zod.object({
@@ -151,7 +236,17 @@ export const UpdatePatientBody = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
+}),zod.null()]),
+  "responsibleParty": zod.union([zod.object({
+  "name": zod.string(),
+  "relationship": zod.string(),
+  "dob": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "employer": zod.string()
 }),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
@@ -182,6 +277,11 @@ export const UpdatePatientBody = zod.object({
   "date": zod.string().nullable(),
   "facility": zod.string().nullable()
 })),
+  "hospitalizations": zod.array(zod.object({
+  "reason": zod.string(),
+  "date": zod.string(),
+  "facility": zod.string()
+})),
   "immunizations": zod.array(zod.object({
   "vaccine": zod.string(),
   "date": zod.string()
@@ -194,6 +294,7 @@ export const UpdatePatientBody = zod.object({
   "smoking": zod.string(),
   "alcohol": zod.string(),
   "occupation": zod.string(),
+  "employer": zod.string(),
   "exercise": zod.string()
 }),
   "vitals": zod.object({
@@ -202,7 +303,58 @@ export const UpdatePatientBody = zod.object({
   "weightLbs": zod.string(),
   "systolic": zod.string(),
   "diastolic": zod.string()
+}),
+  "reviewOfSystems": zod.object({
+  "constitutional": zod.record(zod.string(), zod.string()),
+  "cardiovascular": zod.record(zod.string(), zod.string()),
+  "respiratory": zod.record(zod.string(), zod.string()),
+  "gastrointestinal": zod.record(zod.string(), zod.string()),
+  "neurological": zod.record(zod.string(), zod.string()),
+  "musculoskeletal": zod.record(zod.string(), zod.string()),
+  "skin": zod.record(zod.string(), zod.string()),
+  "psychiatric": zod.record(zod.string(), zod.string())
+}),
+  "obgynHistory": zod.union([zod.object({
+  "lmp": zod.string(),
+  "pregnancies": zod.string(),
+  "deliveries": zod.string(),
+  "miscarriages": zod.string(),
+  "abortions": zod.string(),
+  "liveBirths": zod.string()
+}),zod.null()]),
+  "consents": zod.object({
+  "hipaa": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "consentToTreat": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "billingPolicy": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "releaseInfo": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "telehealth": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
 })
+}),
+  "signature": zod.union([zod.object({
+  "mode": zod.string(),
+  "text": zod.string(),
+  "dataUrl": zod.string(),
+  "date": zod.string()
+}),zod.null()])
 })
 
 export const UpdatePatientResponse = zod.object({
@@ -212,9 +364,15 @@ export const UpdatePatientResponse = zod.object({
   "dateOfBirth": zod.string(),
   "biologicalSex": zod.string(),
   "genderIdentity": zod.string(),
+  "preferredName": zod.string(),
+  "pronouns": zod.string(),
   "preferredLanguage": zod.string(),
   "maritalStatus": zod.string(),
   "bloodType": zod.string(),
+  "ssnLastFour": zod.string(),
+  "race": zod.string(),
+  "ethnicity": zod.string(),
+  "interpreterNeeded": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
@@ -224,6 +382,7 @@ export const UpdatePatientResponse = zod.object({
   "visitSpecialty": zod.string(),
   "reasonForVisit": zod.string(),
   "preferredPharmacy": zod.string(),
+  "pharmacyAddress": zod.string(),
   "pharmacyPhone": zod.string()
 }),
   "insurance": zod.object({
@@ -231,6 +390,8 @@ export const UpdatePatientResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
 }),
   "insuranceSecondary": zod.union([zod.object({
@@ -238,7 +399,17 @@ export const UpdatePatientResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
+}),zod.null()]),
+  "responsibleParty": zod.union([zod.object({
+  "name": zod.string(),
+  "relationship": zod.string(),
+  "dob": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "employer": zod.string()
 }),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
@@ -269,6 +440,11 @@ export const UpdatePatientResponse = zod.object({
   "date": zod.string().nullable(),
   "facility": zod.string().nullable()
 })),
+  "hospitalizations": zod.array(zod.object({
+  "reason": zod.string(),
+  "date": zod.string(),
+  "facility": zod.string()
+})),
   "immunizations": zod.array(zod.object({
   "vaccine": zod.string(),
   "date": zod.string()
@@ -281,6 +457,7 @@ export const UpdatePatientResponse = zod.object({
   "smoking": zod.string(),
   "alcohol": zod.string(),
   "occupation": zod.string(),
+  "employer": zod.string(),
   "exercise": zod.string()
 }),
   "vitals": zod.object({
@@ -290,6 +467,57 @@ export const UpdatePatientResponse = zod.object({
   "systolic": zod.string(),
   "diastolic": zod.string()
 }),
+  "reviewOfSystems": zod.object({
+  "constitutional": zod.record(zod.string(), zod.string()),
+  "cardiovascular": zod.record(zod.string(), zod.string()),
+  "respiratory": zod.record(zod.string(), zod.string()),
+  "gastrointestinal": zod.record(zod.string(), zod.string()),
+  "neurological": zod.record(zod.string(), zod.string()),
+  "musculoskeletal": zod.record(zod.string(), zod.string()),
+  "skin": zod.record(zod.string(), zod.string()),
+  "psychiatric": zod.record(zod.string(), zod.string())
+}),
+  "obgynHistory": zod.union([zod.object({
+  "lmp": zod.string(),
+  "pregnancies": zod.string(),
+  "deliveries": zod.string(),
+  "miscarriages": zod.string(),
+  "abortions": zod.string(),
+  "liveBirths": zod.string()
+}),zod.null()]),
+  "consents": zod.object({
+  "hipaa": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "consentToTreat": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "billingPolicy": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "releaseInfo": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "telehealth": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+})
+}),
+  "signature": zod.union([zod.object({
+  "mode": zod.string(),
+  "text": zod.string(),
+  "dataUrl": zod.string(),
+  "date": zod.string()
+}),zod.null()]),
   "updatedAt": zod.string()
 })
 
@@ -349,9 +577,15 @@ export const ValidateCodeResponse = zod.object({
   "dateOfBirth": zod.string(),
   "biologicalSex": zod.string(),
   "genderIdentity": zod.string(),
+  "preferredName": zod.string(),
+  "pronouns": zod.string(),
   "preferredLanguage": zod.string(),
   "maritalStatus": zod.string(),
   "bloodType": zod.string(),
+  "ssnLastFour": zod.string(),
+  "race": zod.string(),
+  "ethnicity": zod.string(),
+  "interpreterNeeded": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "address": zod.string(),
@@ -361,6 +595,7 @@ export const ValidateCodeResponse = zod.object({
   "visitSpecialty": zod.string(),
   "reasonForVisit": zod.string(),
   "preferredPharmacy": zod.string(),
+  "pharmacyAddress": zod.string(),
   "pharmacyPhone": zod.string()
 }),
   "insurance": zod.object({
@@ -368,6 +603,8 @@ export const ValidateCodeResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
 }),
   "insuranceSecondary": zod.union([zod.object({
@@ -375,7 +612,17 @@ export const ValidateCodeResponse = zod.object({
   "memberId": zod.string(),
   "group": zod.string(),
   "policyholder": zod.string(),
+  "policyholderDob": zod.string(),
+  "policyholderRelationship": zod.string(),
   "phone": zod.string()
+}),zod.null()]),
+  "responsibleParty": zod.union([zod.object({
+  "name": zod.string(),
+  "relationship": zod.string(),
+  "dob": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "employer": zod.string()
 }),zod.null()]),
   "emergencyContact": zod.object({
   "name": zod.string(),
@@ -406,6 +653,11 @@ export const ValidateCodeResponse = zod.object({
   "date": zod.string().nullable(),
   "facility": zod.string().nullable()
 })),
+  "hospitalizations": zod.array(zod.object({
+  "reason": zod.string(),
+  "date": zod.string(),
+  "facility": zod.string()
+})),
   "immunizations": zod.array(zod.object({
   "vaccine": zod.string(),
   "date": zod.string()
@@ -418,6 +670,7 @@ export const ValidateCodeResponse = zod.object({
   "smoking": zod.string(),
   "alcohol": zod.string(),
   "occupation": zod.string(),
+  "employer": zod.string(),
   "exercise": zod.string()
 }),
   "vitals": zod.object({
@@ -427,6 +680,57 @@ export const ValidateCodeResponse = zod.object({
   "systolic": zod.string(),
   "diastolic": zod.string()
 }),
+  "reviewOfSystems": zod.object({
+  "constitutional": zod.record(zod.string(), zod.string()),
+  "cardiovascular": zod.record(zod.string(), zod.string()),
+  "respiratory": zod.record(zod.string(), zod.string()),
+  "gastrointestinal": zod.record(zod.string(), zod.string()),
+  "neurological": zod.record(zod.string(), zod.string()),
+  "musculoskeletal": zod.record(zod.string(), zod.string()),
+  "skin": zod.record(zod.string(), zod.string()),
+  "psychiatric": zod.record(zod.string(), zod.string())
+}),
+  "obgynHistory": zod.union([zod.object({
+  "lmp": zod.string(),
+  "pregnancies": zod.string(),
+  "deliveries": zod.string(),
+  "miscarriages": zod.string(),
+  "abortions": zod.string(),
+  "liveBirths": zod.string()
+}),zod.null()]),
+  "consents": zod.object({
+  "hipaa": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "consentToTreat": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "billingPolicy": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "releaseInfo": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+}),
+  "telehealth": zod.object({
+  "agreed": zod.boolean(),
+  "date": zod.string(),
+  "signature": zod.string()
+})
+}),
+  "signature": zod.union([zod.object({
+  "mode": zod.string(),
+  "text": zod.string(),
+  "dataUrl": zod.string(),
+  "date": zod.string()
+}),zod.null()]),
   "updatedAt": zod.string()
 }),
   "expiresAt": zod.string()

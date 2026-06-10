@@ -11,5 +11,7 @@ export interface Insurance {
   memberId: string;
   group: string;
   policyholder: string;
+  policyholderDob: string;
+  policyholderRelationship: string;
   phone: string;
 }

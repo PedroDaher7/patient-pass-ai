@@ -46,6 +46,12 @@ export interface Surgery {
   facility: string | null;
 }
 
+export interface Hospitalization {
+  reason: string;
+  date: string;
+  facility: string;
+}
+
 export interface Immunization {
   vaccine: string;
   date: string;
@@ -60,6 +66,7 @@ export interface SocialHistory {
   smoking: string;
   alcohol: string;
   occupation: string;
+  employer: string;
   exercise: string;
 }
 
@@ -69,6 +76,7 @@ export interface CareTeam {
   visitSpecialty: string;
   reasonForVisit: string;
   preferredPharmacy: string;
+  pharmacyAddress: string;
   pharmacyPhone: string;
 }
 
@@ -77,6 +85,8 @@ export interface Insurance {
   memberId: string;
   group: string;
   policyholder: string;
+  policyholderDob: string;
+  policyholderRelationship: string;
   phone: string;
 }
 
@@ -84,6 +94,15 @@ export interface EmergencyContact {
   name: string;
   relationship: string;
   phone: string;
+}
+
+export interface ResponsibleParty {
+  name: string;
+  relationship: string;
+  dob: string;
+  phone: string;
+  address: string;
+  employer: string;
 }
 
 export interface Vitals {
@@ -94,6 +113,49 @@ export interface Vitals {
   diastolic: string;
 }
 
+export interface ReviewOfSystemsBody {[key: string]: string}
+
+export interface ReviewOfSystems {
+  constitutional: ReviewOfSystemsBody;
+  cardiovascular: ReviewOfSystemsBody;
+  respiratory: ReviewOfSystemsBody;
+  gastrointestinal: ReviewOfSystemsBody;
+  neurological: ReviewOfSystemsBody;
+  musculoskeletal: ReviewOfSystemsBody;
+  skin: ReviewOfSystemsBody;
+  psychiatric: ReviewOfSystemsBody;
+}
+
+export interface ObgynHistory {
+  lmp: string;
+  pregnancies: string;
+  deliveries: string;
+  miscarriages: string;
+  abortions: string;
+  liveBirths: string;
+}
+
+export interface ConsentItem {
+  agreed: boolean;
+  date: string;
+  signature: string;
+}
+
+export interface Consents {
+  hipaa: ConsentItem;
+  consentToTreat: ConsentItem;
+  billingPolicy: ConsentItem;
+  releaseInfo: ConsentItem;
+  telehealth: ConsentItem;
+}
+
+export interface PatientSignature {
+  mode: string;
+  text: string;
+  dataUrl: string;
+  date: string;
+}
+
 export interface Patient {
   id: string;
   firstName: string;
@@ -101,24 +163,36 @@ export interface Patient {
   dateOfBirth: string;
   biologicalSex: string;
   genderIdentity: string;
+  preferredName: string;
+  pronouns: string;
   preferredLanguage: string;
   maritalStatus: string;
   bloodType: string;
+  ssnLastFour: string;
+  race: string;
+  ethnicity: string;
+  interpreterNeeded: string;
   phone: string;
   email: string;
   address: string;
   careTeam: CareTeam;
   insurance: Insurance;
   insuranceSecondary: Insurance | null;
+  responsibleParty: ResponsibleParty | null;
   emergencyContact: EmergencyContact;
   allergies: Allergy[];
   medications: Medication[];
   conditions: Condition[];
   surgeries: Surgery[];
+  hospitalizations: Hospitalization[];
   immunizations: Immunization[];
   familyHistory: FamilyHistoryEntry[];
   socialHistory: SocialHistory;
   vitals: Vitals;
+  reviewOfSystems: ReviewOfSystems;
+  obgynHistory: ObgynHistory | null;
+  consents: Consents;
+  signature: PatientSignature | null;
   updatedAt: string;
 }
 
@@ -128,24 +202,36 @@ export interface PatientInput {
   dateOfBirth: string;
   biologicalSex: string;
   genderIdentity: string;
+  preferredName: string;
+  pronouns: string;
   preferredLanguage: string;
   maritalStatus: string;
   bloodType: string;
+  ssnLastFour: string;
+  race: string;
+  ethnicity: string;
+  interpreterNeeded: string;
   phone: string;
   email: string;
   address: string;
   careTeam: CareTeam;
   insurance: Insurance;
   insuranceSecondary: Insurance | null;
+  responsibleParty: ResponsibleParty | null;
   emergencyContact: EmergencyContact;
   allergies: Allergy[];
   medications: Medication[];
   conditions: Condition[];
   surgeries: Surgery[];
+  hospitalizations: Hospitalization[];
   immunizations: Immunization[];
   familyHistory: FamilyHistoryEntry[];
   socialHistory: SocialHistory;
   vitals: Vitals;
+  reviewOfSystems: ReviewOfSystems;
+  obgynHistory: ObgynHistory | null;
+  consents: Consents;
+  signature: PatientSignature | null;
 }
 
 export interface CodeRequest {
