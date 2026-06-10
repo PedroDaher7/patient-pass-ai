@@ -1,6 +1,11 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { seedDemoPatient } from "./lib/seed";
+import { pool } from "@workspace/db";
+
+pool.on("error", (err) => {
+  logger.error({ err }, "Unexpected database pool error");
+});
 
 const rawPort = process.env["PORT"];
 

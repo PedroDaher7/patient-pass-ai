@@ -2,3 +2,4 @@
 - [TanStack Query v5 queryKey required](tanstack-query-v5-querykey.md) — passing query options to orval hooks requires explicit queryKey; use the generated getXxxQueryKey() getter.
 - [Drizzle field-rename without column rename](drizzle-field-rename.md) — rename a Drizzle field in TS (e.g. gender→biologicalSex) while keeping the DB column name to avoid a migration.
 - [PatientInput dynamic form handlers](patientinput-dynamic-handlers.md) — cast PatientInput through `unknown` before `Record<string,unknown>` to satisfy TS strict overlap rules in dynamic handlers.
+- [pg Pool must have error listener](pg-pool-error-listener.md) — unhandled 'error' event on pg Pool crashes the Node.js process; register listener in api-server entry point using the logger.
