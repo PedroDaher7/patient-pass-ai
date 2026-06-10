@@ -10,4 +10,6 @@ import type { Patient } from './patient';
 export interface CodeValidationResult {
   patient: Patient;
   expiresAt: string;
+  /** @nullable */
+  lastViewedAt: string | null;
 }

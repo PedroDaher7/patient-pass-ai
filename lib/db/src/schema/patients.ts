@@ -39,6 +39,7 @@ export const patientsTable = pgTable("patients", {
   obgynHistory: jsonb("obgyn_history"),
   consents: jsonb("consents").notNull().default({}),
   signature: jsonb("signature"),
+  recentUpdates: jsonb("recent_updates").notNull().default([]),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

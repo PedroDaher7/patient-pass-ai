@@ -24,6 +24,7 @@ type FamilyT     = { relation: string; condition: string };
 type ImmunizationT = { vaccine: string; date: string; notes: string };
 type ConsentItemT = { agreed: boolean; date: string; signature: string };
 type ApiErrorLike = { data?: { errorCode?: string } };
+type RecentUpdateT = { category: string; label: string; updatedAt: string };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TODAY_PATIENTS = [
@@ -277,25 +278,56 @@ function InsuranceTab({ patient: p }: { patient: Patient }) {
   );
 }
 
-function MedicationsTab({ patient: p }: { patient: Patient }) {
+function UpdatesBanner({ updates }: { updates: RecentUpdateT[] }) {
+  const grouped = updates.reduce((acc, u) => {
+    (acc[u.category] ??= []).push(u.label);
+    return acc;
+  }, {} as Record<string, string[]>);
+  return (
+    <div className="bg-amber-50 border-b border-amber-200 px-5 py-3">
+      <div className="max-w-4xl flex items-start gap-3">
+        <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-amber-800">Updated since last visit</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
+            {Object.entries(grouped).map(([cat, labels]) => (
+              <span key={cat} className="text-xs text-amber-700">
+                <span className="capitalize font-medium">{cat}</span>: {labels.join(", ")}
+              </span>
+            ))}
+          </div>
+          <p className="text-xs text-amber-600 mt-1 italic">No new paperwork needed — patient updated their record directly.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MedicationsTab({ patient: p, updatedLabels }: { patient: Patient; updatedLabels: Set<string> }) {
   const meds = p.medications as MedT[];
   if (!meds.length) return <Empty label="No medications on file" />;
   return (
     <div className="divide-y divide-slate-100">
-      {meds.map((m, i) => (
-        <div key={i} className="py-4">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <p className="font-semibold text-slate-900">{m.name}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {m.dose      && <Badge variant="secondary" className="font-mono text-xs">{m.dose}</Badge>}
-              {m.route     && <Badge variant="outline"   className="text-xs">{m.route}</Badge>}
-              {m.frequency && <Badge variant="outline"   className="text-xs">{m.frequency}</Badge>}
+      {meds.map((m, i) => {
+        const isUpdated = updatedLabels.has(m.name) || updatedLabels.has(`${m.name} ${m.dose}`);
+        return (
+          <div key={i} className={`py-4 ${isUpdated ? "bg-amber-50/40 -mx-6 px-6 rounded" : ""}`}>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-slate-900">{m.name}</p>
+                {isUpdated && <Badge className="text-[10px] px-1.5 py-0 bg-amber-100 text-amber-700 border border-amber-300">Updated</Badge>}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {m.dose      && <Badge variant="secondary" className="font-mono text-xs">{m.dose}</Badge>}
+                {m.route     && <Badge variant="outline"   className="text-xs">{m.route}</Badge>}
+                {m.frequency && <Badge variant="outline"   className="text-xs">{m.frequency}</Badge>}
+              </div>
             </div>
+            {m.reason     && <p className="text-sm text-slate-500 mt-1">{m.reason}</p>}
+            {m.prescriber && <p className="text-xs text-slate-400 mt-0.5">Prescriber: {m.prescriber}</p>}
           </div>
-          {m.reason     && <p className="text-sm text-slate-500 mt-1">{m.reason}</p>}
-          {m.prescriber && <p className="text-xs text-slate-400 mt-0.5">Prescriber: {m.prescriber}</p>}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -585,7 +617,7 @@ function AISummaryPanel({
 }
 
 // ─── Provider Dashboard ───────────────────────────────────────────────────────
-function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expiresAt: string }; onClose: () => void }) {
+function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expiresAt: string; lastViewedAt: string | null }; onClose: () => void }) {
   const p = data.patient;
 
   const [activeTab,    setActiveTab]    = useState("demographics");
@@ -605,6 +637,11 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
   const ct          = p.careTeam    as unknown as Record<string, string>;
   const activeCount = conditions.filter(c => c.status === "Active").length;
   const signedCount = Object.values(consentsObj).filter(c => c?.agreed).length;
+
+  const recentUpdates = (p.recentUpdates ?? []) as RecentUpdateT[];
+  const lastViewedDate = data.lastViewedAt ? data.lastViewedAt.split("T")[0] : null;
+  const newUpdates = recentUpdates.filter(u => !lastViewedDate || u.updatedAt >= lastViewedDate);
+  const medUpdatedLabels = new Set(newUpdates.filter(u => u.category === "medications").map(u => u.label));
 
   const generateSummary = useCallback(async () => {
     setSummLoading(true);
@@ -714,6 +751,7 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
         {/* ── Main ── */}
         <main className="flex-1 overflow-y-auto">
           {allergies.length > 0 && <AllergyBanner allergies={allergies} />}
+          {newUpdates.length > 0 && <UpdatesBanner updates={newUpdates} />}
 
           <div className="p-5 space-y-4 max-w-4xl">
 
@@ -784,7 +822,7 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
                 <div className="p-6">
                   <TabsContent value="demographics"  className="mt-0"><DemographicsTab  patient={p} /></TabsContent>
                   <TabsContent value="insurance"     className="mt-0"><InsuranceTab     patient={p} /></TabsContent>
-                  <TabsContent value="medications"   className="mt-0"><MedicationsTab   patient={p} /></TabsContent>
+                  <TabsContent value="medications"   className="mt-0"><MedicationsTab   patient={p} updatedLabels={medUpdatedLabels} /></TabsContent>
                   <TabsContent value="allergies"     className="mt-0"><AllergiesTab     patient={p} /></TabsContent>
                   <TabsContent value="conditions"    className="mt-0"><ConditionsTab    patient={p} /></TabsContent>
                   <TabsContent value="surgeries"     className="mt-0"><SurgeriesTab     patient={p} /></TabsContent>

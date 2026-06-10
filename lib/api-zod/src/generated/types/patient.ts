@@ -17,6 +17,7 @@ import type { Insurance } from './insurance';
 import type { Medication } from './medication';
 import type { ObgynHistory } from './obgynHistory';
 import type { PatientSignature } from './patientSignature';
+import type { RecentUpdate } from './recentUpdate';
 import type { ResponsibleParty } from './responsibleParty';
 import type { ReviewOfSystems } from './reviewOfSystems';
 import type { SocialHistory } from './socialHistory';
@@ -60,5 +61,6 @@ export interface Patient {
   obgynHistory: ObgynHistory | null;
   consents: Consents;
   signature: PatientSignature | null;
+  recentUpdates: RecentUpdate[];
   updatedAt: string;
 }

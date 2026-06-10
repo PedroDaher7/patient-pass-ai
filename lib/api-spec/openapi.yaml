@@ -566,6 +566,20 @@ components:
         - dataUrl
         - date
 
+    RecentUpdate:
+      type: object
+      properties:
+        category:
+          type: string
+        label:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - category
+        - label
+        - updatedAt
+
     Patient:
       type: object
       properties:
@@ -663,6 +677,10 @@ components:
           oneOf:
             - $ref: "#/components/schemas/PatientSignature"
             - type: "null"
+        recentUpdates:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecentUpdate"
         updatedAt:
           type: string
       required:
@@ -702,6 +720,7 @@ components:
         - obgynHistory
         - consents
         - signature
+        - recentUpdates
         - updatedAt
 
     PatientInput:
@@ -799,6 +818,10 @@ components:
           oneOf:
             - $ref: "#/components/schemas/PatientSignature"
             - type: "null"
+        recentUpdates:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecentUpdate"
       required:
         - firstName
         - lastName
@@ -895,6 +918,9 @@ components:
           $ref: "#/components/schemas/Patient"
         expiresAt:
           type: string
+        lastViewedAt:
+          type: ["string", "null"]
       required:
         - patient
         - expiresAt
+        - lastViewedAt

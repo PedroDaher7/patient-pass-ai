@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { and, eq, gt, isNull, lt } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lt } from "drizzle-orm";
 import { db, patientsTable, accessCodesTable, accessHistoryTable } from "@workspace/db";
 import {
   CreateCodeBody,
@@ -23,6 +23,7 @@ function serializePatient(patient: typeof patientsTable.$inferSelect) {
     medications: patient.medications as Record<string, string>[],
     conditions: patient.conditions as Record<string, string>[],
     surgeries: patient.surgeries as Record<string, string>[],
+    recentUpdates: (patient.recentUpdates ?? []) as { category: string; label: string; updatedAt: string }[],
     updatedAt: patient.updatedAt instanceof Date
       ? patient.updatedAt.toISOString()
       : String(patient.updatedAt),
@@ -123,6 +124,18 @@ router.get("/codes/:code", async (req, res): Promise<void> => {
     return;
   }
 
+  // Capture previous access time before logging current view
+  const [prevAccess] = await db
+    .select({ viewedAt: accessHistoryTable.viewedAt })
+    .from(accessHistoryTable)
+    .where(eq(accessHistoryTable.patientId, entry.patientId))
+    .orderBy(desc(accessHistoryTable.viewedAt))
+    .limit(1);
+
+  const lastViewedAt = prevAccess
+    ? (prevAccess.viewedAt instanceof Date ? prevAccess.viewedAt.toISOString() : String(prevAccess.viewedAt))
+    : null;
+
   // Log the access to history
   await db.insert(accessHistoryTable).values({
     code: entry.code,
@@ -133,6 +146,7 @@ router.get("/codes/:code", async (req, res): Promise<void> => {
   res.json(ValidateCodeResponse.parse({
     patient: serializePatient(patient),
     expiresAt: entry.expiresAt instanceof Date ? entry.expiresAt.toISOString() : String(entry.expiresAt),
+    lastViewedAt,
   }));
 });
 

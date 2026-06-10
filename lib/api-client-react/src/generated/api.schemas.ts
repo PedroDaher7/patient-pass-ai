@@ -156,6 +156,12 @@ export interface PatientSignature {
   date: string;
 }
 
+export interface RecentUpdate {
+  category: string;
+  label: string;
+  updatedAt: string;
+}
+
 export interface Patient {
   id: string;
   firstName: string;
@@ -193,6 +199,7 @@ export interface Patient {
   obgynHistory: ObgynHistory | null;
   consents: Consents;
   signature: PatientSignature | null;
+  recentUpdates: RecentUpdate[];
   updatedAt: string;
 }
 
@@ -232,6 +239,7 @@ export interface PatientInput {
   obgynHistory: ObgynHistory | null;
   consents: Consents;
   signature: PatientSignature | null;
+  recentUpdates?: RecentUpdate[];
 }
 
 export interface CodeRequest {
@@ -260,5 +268,7 @@ export interface AccessHistoryList {
 export interface CodeValidationResult {
   patient: Patient;
   expiresAt: string;
+  /** @nullable */
+  lastViewedAt: string | null;
 }
 

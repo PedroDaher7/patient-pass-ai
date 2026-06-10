@@ -77,6 +77,7 @@ function serializePatient(p: typeof patientsTable.$inferSelect) {
       telehealth: rawConsents.telehealth ?? defaultConsent(),
     },
     signature: (p.signature ?? null) as Record<string, string> | null,
+    recentUpdates: (p.recentUpdates ?? []) as { category: string; label: string; updatedAt: string }[],
     updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : String(p.updatedAt),
   };
 }

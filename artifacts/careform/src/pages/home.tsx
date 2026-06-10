@@ -7,7 +7,7 @@ import {
   useGetActivePass, useGetAccessHistory,
   getGetActivePassQueryKey, getGetAccessHistoryQueryKey,
 } from "@workspace/api-client-react";
-import type { PatientInput, Consents, ConsentItem, PatientSignature, ObgynHistory, ResponsibleParty } from "@workspace/api-client-react";
+import type { PatientInput, Consents, ConsentItem, PatientSignature, ObgynHistory, ResponsibleParty, RecentUpdate } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -672,6 +672,11 @@ export default function Home() {
   const [typedName, setTypedName] = useState("Maria Lopez");
   const initializedForId = useRef<string | null>(null);
   const lastSaved = useRef<string | null>(null);
+  const prevEditingSection = useRef<string | null>(null);
+  const preEditMedNames = useRef<Set<string>>(new Set());
+  const preEditCondNames = useRef<Set<string>>(new Set());
+  const preEditAllergyNames = useRef<Set<string>>(new Set());
+  const pendingSaveToast = useRef(false);
 
   useEffect(() => {
     if (patient && initializedForId.current !== patient.id) {
@@ -702,6 +707,7 @@ export default function Home() {
         obgynHistory: patient.obgynHistory ? { ...(patient.obgynHistory as ObgynHistory) } : null,
         consents: { ...patient.consents },
         signature: patient.signature ? { ...(patient.signature as PatientSignature) } : null,
+        recentUpdates: patient.recentUpdates ? [...patient.recentUpdates] : [],
       };
       setFormData(init);
       lastSaved.current = JSON.stringify(init);
@@ -720,6 +726,10 @@ export default function Home() {
       lastSaved.current = s;
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
+      if (pendingSaveToast.current) {
+        pendingSaveToast.current = false;
+        toast({ title: "Saved. Your providers will see this at your next visit." });
+      }
     } catch {
       toast({ title: "Failed to save", variant: "destructive" });
       setSaveStatus("idle");
@@ -729,6 +739,54 @@ export default function Home() {
   useEffect(() => {
     if (debouncedData && initializedForId.current) saveForm(debouncedData);
   }, [debouncedData, saveForm]);
+
+  useEffect(() => {
+    const prev = prevEditingSection.current;
+    prevEditingSection.current = editingSection;
+    if (!formData) return;
+    if (editingSection !== null && prev === null) {
+      preEditMedNames.current     = new Set((formData.medications as { name: string }[]).map(m => m.name));
+      preEditCondNames.current    = new Set((formData.conditions  as { name: string }[]).map(c => c.name));
+      preEditAllergyNames.current = new Set((formData.allergies   as { name: string }[]).map(a => a.name));
+    } else if (editingSection === null && prev !== null) {
+      const meds    = formData.medications as { name: string; dose?: string }[];
+      const conds   = formData.conditions  as { name: string }[];
+      const allergs = formData.allergies   as { name: string }[];
+      const existing = (formData.recentUpdates ?? []) as RecentUpdate[];
+      const newUpdates: RecentUpdate[] = [];
+      if (prev === "medications") {
+        meds.forEach(m => {
+          if (!preEditMedNames.current.has(m.name)) {
+            const lbl = m.dose ? `${m.name} ${m.dose}` : m.name;
+            if (!existing.some(r => r.category === "medications" && r.label === lbl))
+              newUpdates.push({ category: "medications", label: lbl, updatedAt: TODAY });
+          }
+        });
+      } else if (prev === "conditions") {
+        conds.forEach(c => {
+          if (!preEditCondNames.current.has(c.name)) {
+            if (!existing.some(r => r.category === "conditions" && r.label === c.name))
+              newUpdates.push({ category: "conditions", label: c.name, updatedAt: TODAY });
+          }
+        });
+      } else if (prev === "allergies") {
+        allergs.forEach(a => {
+          if (!preEditAllergyNames.current.has(a.name)) {
+            if (!existing.some(r => r.category === "allergies" && r.label === a.name))
+              newUpdates.push({ category: "allergies", label: a.name, updatedAt: TODAY });
+          }
+        });
+      }
+      if (newUpdates.length > 0) {
+        setFormData(cur => {
+          if (!cur) return cur;
+          const prevUpdates = (cur.recentUpdates ?? []) as RecentUpdate[];
+          return { ...cur, recentUpdates: [...prevUpdates, ...newUpdates] };
+        });
+      }
+      pendingSaveToast.current = true;
+    }
+  }, [editingSection, formData]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleChange = useCallback((field: keyof PatientInput, value: unknown) =>
@@ -873,6 +931,14 @@ export default function Home() {
   const handlers: Handlers = { handleChange, handleNested, handleArrayChange, handleAdd, handleRemove, handleROS, bmi };
 
   // ── Section cards ──────────────────────────────────────────────────────────
+  const recentUpdatesArr = (formData.recentUpdates ?? []) as RecentUpdate[];
+  const isUpdatedMed = (m: { name: string; dose: string }) =>
+    recentUpdatesArr.some(r => r.category === "medications" && (r.label === m.name || r.label === `${m.name} ${m.dose}`));
+  const isUpdatedCond = (c: { name: string }) =>
+    recentUpdatesArr.some(r => r.category === "conditions" && r.label === c.name);
+  const isUpdatedAllergy = (a: { name: string }) =>
+    recentUpdatesArr.some(r => r.category === "allergies" && r.label === a.name);
+
   const sectionCards = [
     {
       id: "registration", title: "Patient Registration", icon: ClipboardList,
@@ -987,7 +1053,10 @@ export default function Home() {
             {(formData.allergies as { name: string; severity: string }[]).slice(0, 2).map((a, i) => (
               <div key={i} className="flex items-center justify-between gap-2">
                 <span className="text-sm text-slate-700 truncate">{a.name}</span>
-                <Badge variant={a.severity === "Severe" ? "destructive" : "secondary"} className="text-[10px] px-1.5 flex-shrink-0">{a.severity}</Badge>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {isUpdatedAllergy(a) && <Badge className="text-[10px] px-1.5 py-0 bg-amber-50 text-amber-600 border border-amber-200">Updated</Badge>}
+                  <Badge variant={a.severity === "Severe" ? "destructive" : "secondary"} className="text-[10px] px-1.5">{a.severity}</Badge>
+                </div>
               </div>
             ))}
             {formData.allergies.length > 2 && <p className="text-xs text-slate-400">+{formData.allergies.length - 2} more</p>}
@@ -1003,9 +1072,10 @@ export default function Home() {
         : (
           <>
             {(formData.medications as { name: string; dose: string }[]).slice(0, 3).map((m, i) => (
-              <div key={i} className="text-sm leading-snug">
-                <span className="text-slate-800 font-medium">{m.name}</span>{" "}
+              <div key={i} className="text-sm leading-snug flex items-center gap-1.5 flex-wrap">
+                <span className="text-slate-800 font-medium">{m.name}</span>
                 <span className="text-slate-400">{m.dose}</span>
+                {isUpdatedMed(m) && <Badge className="text-[10px] px-1.5 py-0 bg-amber-50 text-amber-600 border border-amber-200">Updated</Badge>}
               </div>
             ))}
             {formData.medications.length > 3 && <p className="text-xs text-slate-400">+{formData.medications.length - 3} more</p>}
@@ -1024,6 +1094,7 @@ export default function Home() {
               <div key={i} className="flex items-center gap-2 text-sm">
                 <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.status === "Active" ? "bg-purple-500" : "bg-slate-300"}`} />
                 <span className="text-slate-700 truncate">{c.name}</span>
+                {isUpdatedCond(c) && <Badge className="text-[10px] px-1.5 py-0 bg-amber-50 text-amber-600 border border-amber-200">Updated</Badge>}
               </div>
             ))}
             {formData.conditions.length > 3 && <p className="text-xs text-slate-400">+{formData.conditions.length - 3} more</p>}

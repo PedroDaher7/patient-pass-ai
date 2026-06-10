@@ -69,6 +69,14 @@ const DEMO_PATIENT = {
   ],
   medications: [
     {
+      name: "Empagliflozin",
+      dose: "10 mg",
+      frequency: "Once daily",
+      route: "Oral",
+      prescriber: "Dr. Ramesh Patel, MD",
+      reason: "Type 2 diabetes — cardioprotective SGLT2 inhibitor",
+    },
+    {
       name: "Metformin",
       dose: "1000 mg",
       frequency: "Twice daily with meals",
@@ -297,6 +305,9 @@ const DEMO_PATIENT = {
     dataUrl: "",
     date: TODAY,
   },
+  recentUpdates: [
+    { category: "medications", label: "Empagliflozin 10 mg", updatedAt: TODAY },
+  ],
 };
 
 export { DEMO_PATIENT };

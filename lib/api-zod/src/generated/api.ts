@@ -184,6 +184,11 @@ export const GetPatientResponse = zod.object({
   "dataUrl": zod.string(),
   "date": zod.string()
 }),zod.null()]),
+  "recentUpdates": zod.array(zod.object({
+  "category": zod.string(),
+  "label": zod.string(),
+  "updatedAt": zod.string()
+})),
   "updatedAt": zod.string()
 })
 
@@ -354,7 +359,12 @@ export const UpdatePatientBody = zod.object({
   "text": zod.string(),
   "dataUrl": zod.string(),
   "date": zod.string()
-}),zod.null()])
+}),zod.null()]),
+  "recentUpdates": zod.array(zod.object({
+  "category": zod.string(),
+  "label": zod.string(),
+  "updatedAt": zod.string()
+})).optional()
 })
 
 export const UpdatePatientResponse = zod.object({
@@ -518,6 +528,11 @@ export const UpdatePatientResponse = zod.object({
   "dataUrl": zod.string(),
   "date": zod.string()
 }),zod.null()]),
+  "recentUpdates": zod.array(zod.object({
+  "category": zod.string(),
+  "label": zod.string(),
+  "updatedAt": zod.string()
+})),
   "updatedAt": zod.string()
 })
 
@@ -731,9 +746,15 @@ export const ValidateCodeResponse = zod.object({
   "dataUrl": zod.string(),
   "date": zod.string()
 }),zod.null()]),
+  "recentUpdates": zod.array(zod.object({
+  "category": zod.string(),
+  "label": zod.string(),
+  "updatedAt": zod.string()
+})),
   "updatedAt": zod.string()
 }),
-  "expiresAt": zod.string()
+  "expiresAt": zod.string(),
+  "lastViewedAt": zod.string().nullable()
 })
 
 

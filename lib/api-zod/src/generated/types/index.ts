@@ -28,6 +28,7 @@ export * from './obgynHistory';
 export * from './patient';
 export * from './patientInput';
 export * from './patientSignature';
+export * from './recentUpdate';
 export * from './responsibleParty';
 export * from './reviewOfSystems';
 export * from './reviewOfSystemsBody';
