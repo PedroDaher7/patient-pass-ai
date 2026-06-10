@@ -1,6 +1,9 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, QrCode, Stethoscope, ArrowRight } from "lucide-react";
+import {
+  ClipboardList, QrCode, Stethoscope, ArrowRight,
+  Lock, Smile, Zap, CheckCircle2, RefreshCw,
+} from "lucide-react";
 
 function Step({
   number,
@@ -26,6 +29,56 @@ function Step({
       <div>
         <h3 className="font-semibold text-slate-900 text-lg mb-1">{title}</h3>
         <p className="text-slate-500 text-base leading-relaxed">{body}</p>
+      </div>
+    </div>
+  );
+}
+
+const BENEFITS = [
+  {
+    icon: Lock,
+    title: "Security you control",
+    body: "Your information is encrypted and shared only through a temporary code you create. Access expires on its own, and you can revoke it at any time.",
+  },
+  {
+    icon: Smile,
+    title: "Peace of mind",
+    body: "Walk into any visit knowing your full history is accurate and ready, instead of trying to remember medication names and dates in a stressful moment.",
+  },
+  {
+    icon: Zap,
+    title: "Save time",
+    body: "Skip the clipboard. Check in within seconds rather than re-filling the same intake at every new office.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Fewer errors",
+    body: "Standardized, patient-verified information means no misread handwriting and no manual re-typing mistakes by staff.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Always up to date",
+    body: "Update your medications, allergies, and conditions once, on your own time, and every provider sees the current version.",
+  },
+];
+
+function BenefitCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ElementType;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 p-7 flex flex-col gap-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200">
+      <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+        <Icon className="w-5 h-5 text-primary" strokeWidth={1.75} />
+      </div>
+      <div>
+        <h3 className="font-semibold text-slate-900 text-base mb-2 leading-snug">{title}</h3>
+        <p className="text-slate-500 text-sm leading-relaxed">{body}</p>
       </div>
     </div>
   );
@@ -120,12 +173,39 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Why CareForm */}
+        <section className="bg-slate-50 border-t border-slate-100 px-6 md:px-10 py-16 md:py-20">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-center text-2xl md:text-3xl font-bold text-slate-900 mb-3">
+              Why CareForm
+            </h2>
+            <p className="text-center text-slate-500 mb-14 text-base max-w-xl mx-auto">
+              Built around the patient, not the paperwork.
+            </p>
+
+            {/* 3 + 2 centered grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {BENEFITS.slice(0, 3).map((b) => (
+                <BenefitCard key={b.title} icon={b.icon} title={b.title} body={b.body} />
+              ))}
+            </div>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5 lg:w-2/3 lg:mx-auto">
+              {BENEFITS.slice(3).map((b) => (
+                <BenefitCard key={b.title} icon={b.icon} title={b.title} body={b.body} />
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Footer CTA */}
-        <section className="bg-primary/5 border-t border-blue-100 px-6 py-12 text-center">
-          <p className="text-slate-600 mb-6 text-lg font-medium">Ready to try it?</p>
+        <section className="bg-primary/5 border-t border-blue-100 px-6 py-14 text-center">
+          <p className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 tracking-tight">
+            One intake, accurate everywhere.
+          </p>
+          <p className="text-slate-500 mb-8 text-base">Ready to try it?</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/patient">
-              <Button size="lg" className="w-full sm:w-auto px-10 h-12 gap-2">
+              <Button size="lg" className="w-full sm:w-auto px-10 h-12 gap-2 shadow-sm shadow-primary/20">
                 Open my intake
                 <ArrowRight className="w-4 h-4" />
               </Button>
