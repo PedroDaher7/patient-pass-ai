@@ -3,13 +3,18 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CareForm AI API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: patient
+    description: Patient intake operations
+  - name: codes
+    description: Access code operations
+
 paths:
   /healthz:
     get:
@@ -24,6 +29,112 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /patient/{id}:
+    get:
+      operationId: getPatient
+      tags: [patient]
+      summary: Get patient intake
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Patient intake data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      operationId: updatePatient
+      tags: [patient]
+      summary: Update patient intake
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientInput"
+      responses:
+        "200":
+          description: Updated patient intake
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /codes:
+    post:
+      operationId: createCode
+      tags: [codes]
+      summary: Generate a 6-digit access code for a patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CodeRequest"
+      responses:
+        "201":
+          description: Access code created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessCode"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /codes/{code}:
+    get:
+      operationId: validateCode
+      tags: [codes]
+      summary: Validate a 6-digit access code and return patient intake
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Patient intake data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeValidationResult"
+        "404":
+          description: Code not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +145,249 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Allergy:
+      type: object
+      properties:
+        name:
+          type: string
+        severity:
+          type: string
+        reaction:
+          type: string
+      required:
+        - name
+        - severity
+        - reaction
+
+    Medication:
+      type: object
+      properties:
+        name:
+          type: string
+        dose:
+          type: string
+        frequency:
+          type: string
+        prescriber:
+          type: string
+      required:
+        - name
+        - dose
+        - frequency
+        - prescriber
+
+    Condition:
+      type: object
+      properties:
+        name:
+          type: string
+        diagnosedDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - name
+        - diagnosedDate
+        - notes
+
+    Surgery:
+      type: object
+      properties:
+        procedure:
+          type: string
+        date:
+          type: ["string", "null"]
+        hospital:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - procedure
+        - date
+        - hospital
+        - notes
+
+    Insurance:
+      type: object
+      properties:
+        plan:
+          type: string
+        memberId:
+          type: string
+        group:
+          type: string
+        phone:
+          type: string
+      required:
+        - plan
+        - memberId
+        - group
+        - phone
+
+    EmergencyContact:
+      type: object
+      properties:
+        name:
+          type: string
+        relationship:
+          type: string
+        phone:
+          type: string
+      required:
+        - name
+        - relationship
+        - phone
+
+    Patient:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        insurance:
+          $ref: "#/components/schemas/Insurance"
+        emergencyContact:
+          $ref: "#/components/schemas/EmergencyContact"
+        allergies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Allergy"
+        medications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Medication"
+        conditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Condition"
+        surgeries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Surgery"
+        updatedAt:
+          type: string
+      required:
+        - id
+        - firstName
+        - lastName
+        - dateOfBirth
+        - gender
+        - phone
+        - email
+        - address
+        - insurance
+        - emergencyContact
+        - allergies
+        - medications
+        - conditions
+        - surgeries
+        - updatedAt
+
+    PatientInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        insurance:
+          $ref: "#/components/schemas/Insurance"
+        emergencyContact:
+          $ref: "#/components/schemas/EmergencyContact"
+        allergies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Allergy"
+        medications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Medication"
+        conditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Condition"
+        surgeries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Surgery"
+      required:
+        - firstName
+        - lastName
+        - dateOfBirth
+        - gender
+        - phone
+        - email
+        - address
+        - insurance
+        - emergencyContact
+        - allergies
+        - medications
+        - conditions
+        - surgeries
+
+    CodeRequest:
+      type: object
+      properties:
+        patientId:
+          type: string
+        expiresInMinutes:
+          type: ["integer", "null"]
+      required:
+        - patientId
+        - expiresInMinutes
+
+    AccessCode:
+      type: object
+      properties:
+        code:
+          type: string
+        patientId:
+          type: string
+        expiresAt:
+          type: string
+      required:
+        - code
+        - patientId
+        - expiresAt
+
+    CodeValidationResult:
+      type: object
+      properties:
+        patient:
+          $ref: "#/components/schemas/Patient"
+        expiresAt:
+          type: string
+      required:
+        - patient
+        - expiresAt
