@@ -11,7 +11,7 @@ import {
   AlertTriangle, AlertCircle, ShieldOff, Clock, FileText, Loader2,
   User, Calendar, Pill, HeartPulse, Brain, Sparkles,
   FileCheck, ClipboardList, Copy, Download, Printer, CheckCircle2,
-  Building2, X, CheckCheck,
+  Building2, X, CheckCheck, Search,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -25,6 +25,15 @@ type ImmunizationT = { vaccine: string; date: string; notes: string };
 type ConsentItemT = { agreed: boolean; date: string; signature: string };
 type ApiErrorLike = { data?: { errorCode?: string } };
 type RecentUpdateT = { category: string; label: string; updatedAt: string };
+type LookupProps = {
+  input: string;
+  setInput: (v: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isLoading: boolean;
+  error: { heading: string; body: string; icon: React.ReactNode } | null;
+  isDemo: boolean;
+  onResetDemo: () => void;
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TODAY_PATIENTS = [
@@ -617,7 +626,7 @@ function AISummaryPanel({
 }
 
 // ─── Provider Dashboard ───────────────────────────────────────────────────────
-function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expiresAt: string; lastViewedAt: string | null }; onClose: () => void }) {
+function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expiresAt: string; lastViewedAt: string | null }; lookup: LookupProps }) {
   const p = data.patient;
 
   const [activeTab,    setActiveTab]    = useState("demographics");
@@ -684,6 +693,9 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
         <span className="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full flex-shrink-0">Provider View</span>
         <span className="hidden md:block text-slate-300 text-sm">|</span>
         <span className="hidden md:block font-semibold text-slate-800 truncate">{p.firstName} {p.lastName}</span>
+        {lookup.isDemo && (
+          <span className="hidden md:inline-flex items-center text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full flex-shrink-0">Demo</span>
+        )}
         <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
           <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 hidden sm:flex" onClick={handleCopyEHR}>
             {copied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -703,9 +715,12 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{isReviewed ? "Reviewed ✓" : "Mark Reviewed"}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400" onClick={onClose}>
-            <X className="w-4 h-4" />
-          </Button>
+          {!lookup.isDemo && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 text-slate-400 hover:text-slate-600 px-2" onClick={lookup.onResetDemo}>
+              <X className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Demo</span>
+            </Button>
+          )}
         </div>
       </header>
 
@@ -713,38 +728,95 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Sidebar ── */}
-        <aside className="w-52 bg-white border-r border-slate-200 flex-col overflow-y-auto flex-shrink-0 hidden lg:flex">
-          <div className="px-4 pt-5 pb-2">
+        <aside className="w-56 bg-white border-r border-slate-200 flex-col flex-shrink-0 hidden lg:flex overflow-hidden">
+          {/* Today's patients */}
+          <div className="px-4 pt-4 pb-2 flex-shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Patients</p>
             <p className="text-[10px] text-slate-400 mt-0.5">{new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
           </div>
-          <div className="flex-1 px-2 pb-4 space-y-0.5">
+          <div className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto min-h-0">
             {TODAY_PATIENTS.map(pt => {
-              const active   = pt.status === "active";
-              const waiting  = pt.status === "waiting";
+              const isMaria   = pt.id === "P001";
+              const isActive  = isMaria && lookup.isDemo;
+              const isWaiting = pt.status === "waiting";
               return (
-                <div key={pt.id} className={`rounded-lg px-3 py-2.5 ${active ? "bg-blue-50 border border-blue-200" : "hover:bg-slate-50"}`}>
+                <button
+                  key={pt.id}
+                  type="button"
+                  onClick={isMaria ? lookup.onResetDemo : undefined}
+                  className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors ${
+                    isActive ? "bg-blue-50 border border-blue-200"
+                    : isMaria ? "hover:bg-slate-50 cursor-pointer"
+                    : "opacity-50 cursor-default"
+                  }`}
+                >
                   <div className="flex items-center gap-2">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
-                      active ? "bg-blue-600 text-white" : waiting ? "bg-slate-200 text-slate-600" : "bg-slate-100 text-slate-400"
+                      isActive ? "bg-blue-600 text-white" : isWaiting ? "bg-slate-200 text-slate-600" : "bg-slate-100 text-slate-400"
                     }`}>{pt.initials}</div>
                     <div className="min-w-0">
-                      <p className={`text-xs font-semibold truncate ${active ? "text-blue-800" : "text-slate-700"}`}>{pt.name}</p>
+                      <p className={`text-xs font-semibold truncate ${isActive ? "text-blue-800" : "text-slate-700"}`}>{pt.name}</p>
                       <p className="text-[10px] text-slate-400 truncate">{pt.specialty}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-1 pl-9">
                     <span className="text-[10px] text-slate-400">{pt.time}</span>
-                    {active  && <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-medium">Active</span>}
-                    {waiting && <span className="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded font-medium">Waiting</span>}
+                    {isActive  && <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-medium">Active</span>}
+                    {!isActive && isWaiting && <span className="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded font-medium">Waiting</span>}
                     {pt.status === "upcoming" && <span className="text-[10px] text-slate-300">Upcoming</span>}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
-          <div className="border-t border-slate-100 px-4 py-3 text-[10px] text-slate-400">
-            Pass expires {new Date(data.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+
+          {/* Look up a patient */}
+          <div className="border-t border-slate-100 px-3 pt-3 pb-2 flex-shrink-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+              <Search className="w-3 h-3" />
+              Look up a patient
+            </p>
+            <form onSubmit={lookup.onSubmit} className="space-y-1.5">
+              <Input
+                value={lookup.input}
+                onChange={e => lookup.setInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                className="h-8 text-xs font-mono text-center tracking-[0.35em] border-slate-200"
+                inputMode="numeric"
+                autoComplete="off"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full h-7 text-xs gap-1.5"
+                disabled={lookup.input.replace(/\D/g, "").length !== 6 || lookup.isLoading}
+              >
+                {lookup.isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Load record"}
+              </Button>
+            </form>
+            {lookup.error && (
+              <div className="mt-2 rounded-lg bg-rose-50 border border-rose-100 px-2.5 py-2">
+                <p className="text-xs font-semibold text-rose-700">{lookup.error.heading}</p>
+                <p className="text-[11px] text-rose-600 mt-0.5">{lookup.error.body}</p>
+              </div>
+            )}
+            {!lookup.isDemo && (
+              <button
+                type="button"
+                onClick={lookup.onResetDemo}
+                className="mt-2 text-[10px] text-slate-400 hover:text-primary transition-colors underline w-full text-center block"
+              >
+                Back to demo patient
+              </button>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-slate-100 px-4 py-2.5 flex-shrink-0">
+            {lookup.isDemo
+              ? <span className="text-[10px] text-blue-500 font-medium">Demo · Maria Lopez</span>
+              : <span className="text-[10px] text-slate-400">Pass expires {new Date(data.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            }
           </div>
         </aside>
 
@@ -857,71 +929,62 @@ function ProviderDashboard({ data, onClose }: { data: { patient: Patient; expire
   );
 }
 
-// ─── Code Entry (default export) ─────────────────────────────────────────────
+// ─── Provider Page ─────────────────────────────────────────────────────────────
 export default function Provider() {
-  const codeParam = new URLSearchParams(window.location.search).get("code") ?? "";
-  const [inputCode, setInputCode] = useState(codeParam);
-  const [activeCode, setActiveCode] = useState(codeParam);
+  const [demoPatient, setDemoPatient] = useState<Patient | null>(null);
+  const [activeCode,  setActiveCode]  = useState(() => new URLSearchParams(window.location.search).get("code") ?? "");
+  const [lookupInput, setLookupInput] = useState("");
 
-  const { data, isLoading, error, isError } = useValidateCode(activeCode, {
-    query: { queryKey: getValidateCodeQueryKey(activeCode), enabled: !!activeCode, retry: false },
-  });
+  useEffect(() => {
+    fetch("/api/patient/demo")
+      .then(r => { if (!r.ok) throw new Error(); return r.json() as Promise<Patient>; })
+      .then(setDemoPatient)
+      .catch(() => {});
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { data: codeData, isLoading: codeLoading, isError: codeIsError, error: codeError } = useValidateCode(
+    activeCode,
+    { query: { queryKey: getValidateCodeQueryKey(activeCode), enabled: !!activeCode, retry: false } },
+  );
+
+  const handleLookupSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = inputCode.replace(/\D/g, "").slice(0, 6);
-    if (trimmed.length === 6) setActiveCode(trimmed);
+    const code = lookupInput.replace(/\D/g, "").slice(0, 6);
+    if (code.length === 6) setActiveCode(code);
+  }, [lookupInput]);
+
+  const handleResetDemo = useCallback(() => {
+    setActiveCode("");
+    setLookupInput("");
+  }, []);
+
+  const demoData = demoPatient
+    ? {
+        patient: demoPatient,
+        expiresAt: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+        lastViewedAt: "2026-06-03",
+      }
+    : null;
+
+  const activeData = codeData ?? demoData;
+
+  const lookup: LookupProps = {
+    input: lookupInput,
+    setInput: setLookupInput,
+    onSubmit: handleLookupSubmit,
+    isLoading: codeLoading,
+    error: codeIsError ? getErrorMessage(codeError) : null,
+    isDemo: !codeData,
+    onResetDemo: handleResetDemo,
   };
 
-  if (data) {
-    return <ProviderDashboard data={data} onClose={() => { setActiveCode(""); setInputCode(""); }} />;
+  if (!activeData) {
+    return (
+      <div className="h-dvh bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    );
   }
 
-  const errInfo = isError ? getErrorMessage(error) : null;
-
-  return (
-    <Layout>
-      <div className="max-w-sm mx-auto mt-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-7 h-7" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Provider Access</h1>
-          <p className="text-slate-500 mt-2 text-sm max-w-xs mx-auto">
-            Enter the 6-digit code shared by the patient to view their intake record.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            value={inputCode}
-            onChange={e => setInputCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder="000000"
-            className="text-center text-3xl font-mono tracking-[0.5em] h-16 border-2 focus:border-primary"
-            autoFocus
-            inputMode="numeric"
-          />
-          <Button
-            type="submit"
-            className="w-full h-12 text-base shadow-sm shadow-primary/20"
-            disabled={inputCode.replace(/\D/g, "").length !== 6 || isLoading}
-          >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "View Patient Record"}
-          </Button>
-        </form>
-
-        {errInfo && (
-          <div className="mt-4 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-start gap-3 text-sm">
-            <span className="text-rose-500 mt-0.5 flex-shrink-0">{errInfo.icon}</span>
-            <div>
-              <p className="font-semibold text-rose-700">{errInfo.heading}</p>
-              <p className="text-rose-600 mt-0.5 text-xs">{errInfo.body}</p>
-            </div>
-          </div>
-        )}
-
-        <p className="text-center text-xs text-slate-400 mt-6">All patient data is read-only on this side.</p>
-      </div>
-    </Layout>
-  );
+  return <ProviderDashboard data={activeData} lookup={lookup} />;
 }
