@@ -128,6 +128,44 @@ function FeatureCard({ icon: Icon, title, body }: { icon: React.ElementType; tit
   );
 }
 
+function DeepFeatureCard({
+  icon: Icon,
+  label,
+  title,
+  body,
+  chips,
+}: {
+  icon: React.ElementType;
+  label: string;
+  title: string;
+  body: string;
+  chips: string[];
+}) {
+  return (
+    <div className="relative bg-white rounded-2xl border border-slate-100 p-7 flex flex-col gap-5 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300 group overflow-hidden h-full">
+      <div className="absolute top-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent group-hover:via-blue-400 transition-colors duration-300" />
+      <div className="flex items-center gap-3 pt-1">
+        <div className="w-10 h-10 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-blue-600" strokeWidth={1.5} />
+        </div>
+        <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none">{label}</span>
+      </div>
+      <div className="flex-1">
+        <h3 className="font-bold text-slate-900 text-lg leading-snug mb-3">{title}</h3>
+        <p className="text-slate-500 text-sm leading-relaxed">{body}</p>
+      </div>
+      <div className="flex flex-wrap gap-2 pt-1">
+        {chips.map(chip => (
+          <span key={chip} className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
+            <Check className="w-3 h-3 text-blue-500 flex-shrink-0" strokeWidth={2.5} />
+            {chip}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProblemCard({ icon: Icon, title, body, color }: { icon: React.ElementType; title: string; body: string; color: string }) {
   return (
     <div className={`rounded-2xl border p-6 flex flex-col gap-3 ${color}`}>
@@ -421,6 +459,71 @@ export default function Landing() {
                 </FadeIn>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════ DEEP FEATURES */}
+        <section className="px-6 md:px-10 py-16 md:py-24 bg-gradient-to-b from-slate-50/80 to-white border-t border-slate-100">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn className="text-center mb-4">
+              <SectionLabel>Key capabilities</SectionLabel>
+            </FadeIn>
+            <FadeIn delay={50} className="text-center mb-4">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                More than a form. A health pass that<br className="hidden sm:block" /> stays current and stays yours.
+              </h2>
+            </FadeIn>
+            <FadeIn delay={100} className="text-center mb-14">
+              <p className="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto">
+                One profile that prepares you for every visit, updates everywhere at once, and stays under your control.
+              </p>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch">
+              <FadeIn delay={0} className="h-full">
+                <DeepFeatureCard
+                  icon={ClipboardList}
+                  label="Ready for every visit"
+                  title="Know what each visit needs, before you arrive."
+                  body="Every provider can request the exact information they need ahead of time. CarePass shows what is still missing for your upcoming appointment, so you walk in complete and the front desk is not chasing paperwork."
+                  chips={["Fewer missing forms", "Faster check-in"]}
+                />
+              </FadeIn>
+              <FadeIn delay={110} className="h-full">
+                <DeepFeatureCard
+                  icon={RefreshCw}
+                  label="Always in sync"
+                  title="Update once. Every provider stays current."
+                  body="Add a new medication or allergy and your CarePass updates everywhere it has been shared. At your next visit the information is already there and merged, with no forms to redo, and your provider sees exactly what changed since they last saw you."
+                  chips={["No re-entry", "Fewer errors"]}
+                />
+              </FadeIn>
+              <FadeIn delay={220} className="h-full">
+                <DeepFeatureCard
+                  icon={Shield}
+                  label="You control access"
+                  title="See exactly who has your information."
+                  body="A clear record of every provider you have shared with, when they viewed it, and whether access is still active. Revoke any provider with one tap. Your data stays yours."
+                  chips={["Full transparency", "Revoke anytime"]}
+                />
+              </FadeIn>
+            </div>
+
+            <FadeIn delay={300} className="mt-10 text-center">
+              <div className="inline-flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/patient">
+                  <Button size="lg" className="w-full sm:w-auto h-12 px-8 gap-2 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 transition-shadow text-sm">
+                    Create my CarePass
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/provider">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 border-2 border-slate-200 text-slate-700 hover:border-primary hover:text-primary hover:bg-blue-50/50 transition-all text-sm">
+                    I'm a provider
+                  </Button>
+                </Link>
+              </div>
+            </FadeIn>
           </div>
         </section>
 
