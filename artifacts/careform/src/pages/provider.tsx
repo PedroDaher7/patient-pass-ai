@@ -689,7 +689,7 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
     <div className="h-dvh bg-slate-50 flex flex-col font-sans text-slate-900 overflow-hidden">
       {/* ── Top bar ── */}
       <header className="bg-white border-b border-slate-200 px-5 h-14 flex items-center gap-3 flex-shrink-0 shadow-sm z-20">
-        <span className="font-bold text-base tracking-tight text-primary flex-shrink-0">CarePass AI</span>
+        <span className="font-bold text-base tracking-tight text-primary flex-shrink-0">PatientPass AI</span>
         <span className="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full flex-shrink-0">Provider View</span>
         <span className="hidden md:block text-slate-300 text-sm">|</span>
         <span className="hidden md:block font-semibold text-slate-800 truncate">{p.firstName} {p.lastName}</span>

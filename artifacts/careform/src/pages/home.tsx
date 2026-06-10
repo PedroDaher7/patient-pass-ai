@@ -441,8 +441,8 @@ function UpcomingAppointmentCard() {
   );
 }
 
-// ── CarePass AI Review card ────────────────────────────────────────────────────
-function CarePassAIReview({ formData, completeness }: { formData: PatientInput; completeness: number }) {
+// ── PatientPass AI Review card ────────────────────────────────────────────────────
+function PatientPassAIReview({ formData, completeness }: { formData: PatientInput; completeness: number }) {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [visitSummary, setVisitSummary] = useState<{ summary: string; questions: string[] } | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
@@ -450,9 +450,9 @@ function CarePassAIReview({ formData, completeness }: { formData: PatientInput; 
   const flags = computeAIFlags(formData);
 
   const readiness =
-    completeness >= 90 ? "Your CarePass is complete and ready to share."
-    : completeness >= 70 ? "Your CarePass is almost ready — a few items to review."
-    : "Your CarePass needs some attention before your visit.";
+    completeness >= 90 ? "Your PatientPass is complete and ready to share."
+    : completeness >= 70 ? "Your PatientPass is almost ready — a few items to review."
+    : "Your PatientPass needs some attention before your visit.";
 
   const badgeClass =
     completeness >= 90 ? "bg-green-50 text-green-700"
@@ -486,7 +486,7 @@ function CarePassAIReview({ formData, completeness }: { formData: PatientInput; 
           <Sparkles className="w-4 h-4 text-white" strokeWidth={1.75} />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold text-slate-800">CarePass AI Review</h2>
+          <h2 className="text-sm font-semibold text-slate-800">PatientPass AI Review</h2>
           <p className="text-[11px] text-slate-400 leading-tight">Personalized readiness check for your visit</p>
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${badgeClass}`}>
@@ -566,7 +566,7 @@ function CarePassAIReview({ formData, completeness }: { formData: PatientInput; 
 
         {/* Disclaimer */}
         <p className="text-[10px] text-slate-400 leading-relaxed border-t border-slate-100 pt-4">
-          CarePass AI helps you stay organized and prepared. It does not provide medical diagnosis or treatment advice.
+          PatientPass AI helps you stay organized and prepared. It does not provide medical diagnosis or treatment advice.
         </p>
       </div>
     </div>
@@ -1269,15 +1269,15 @@ export default function Home() {
         {/* Upcoming Appointment */}
         <UpcomingAppointmentCard />
 
-        {/* CarePass AI Review */}
-        <CarePassAIReview formData={formData} completeness={completeness} />
+        {/* PatientPass AI Review */}
+        <PatientPassAIReview formData={formData} completeness={completeness} />
 
         {/* Pass Panel */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm mt-5 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
             <div className="flex items-center gap-2">
               <QrCode className="w-4 h-4 text-blue-600" />
-              <h2 className="text-sm font-semibold text-slate-800">Your CarePass</h2>
+              <h2 className="text-sm font-semibold text-slate-800">Your PatientPass</h2>
             </div>
             {(history?.entries?.length ?? 0) > 0 && (
               <button onClick={() => sharedWithRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors">
@@ -1357,7 +1357,7 @@ export default function Home() {
             </div>
           ) : sharedWith.entries.length === 0 ? (
             <div className="px-6 py-8 text-center text-sm text-slate-400">
-              You haven't shared your CarePass with anyone yet.
+              You haven't shared your PatientPass with anyone yet.
             </div>
           ) : (
             <div className="divide-y divide-slate-50">
@@ -1633,7 +1633,7 @@ function PatientHeader({ saveStatus, onReset }: { saveStatus: "idle" | "saving" 
     <header className="border-b bg-white border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-3">
         <Link href="/" className="font-bold text-xl tracking-tight text-primary hover:opacity-80 transition-opacity">
-          CarePass AI
+          PatientPass AI
         </Link>
         <span className="hidden sm:block text-xs font-medium bg-blue-50 text-blue-600 px-2 py-1 rounded-full">Your Intake</span>
       </div>
