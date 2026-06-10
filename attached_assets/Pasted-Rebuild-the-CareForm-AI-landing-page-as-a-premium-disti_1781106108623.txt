@@ -1,0 +1,55 @@
+Rebuild the CareForm AI landing page as a premium, distinctive healthcare product page that looks like a venture-backed startup and an Oracle hackathon finalist. Avoid a generic template feel.
+
+Art direction: white and very light blue backgrounds, one confident blue accent, subtle gradients, generous whitespace, a strong modern sans-serif with clear hierarchy and large headlines, rounded cards with soft shadows, small line icons, and light scroll-in motion. Mobile-first and fully responsive. Calm, clean, and trustworthy, never busy.
+
+All call-to-action buttons must connect to the real app, which has no sign-up:
+- Primary CTA "Create my CareForm" routes to /patient.
+- Secondary CTA "I'm a provider" routes to /provider.
+- Do not add a "Watch Demo" video button; there is no video, and the live app is the demo.
+- Small line under the hero buttons: "No sign-up or login required."
+
+HERO
+Headline: Stop filling out the same medical forms over and over.
+Subheadline: CareForm AI gives you one secure health intake profile you maintain once and share with any doctor, clinic, or hospital in seconds, by QR code or a temporary access code.
+Hero visual: a simple flow showing Patient, then CareForm AI, then Doctor, with a QR code and a six-digit approval code on the share step.
+Trust badges as small chips with check icons: Patient controlled, Secure sharing, AI assisted, Integration ready.
+
+PROBLEM
+Headline: Healthcare still starts with a clipboard.
+Body: Every new doctor, specialist, urgent care, imaging center, or hospital asks for the same things again. Medications, allergies, surgeries, insurance, emergency contacts, history. When you cannot remember it all, mistakes slip in, and for older patients, caregivers, and anyone managing several conditions, it is stressful and easy to get wrong.
+Four stat-style cards: Repeated forms (you enter the same information dozens of times across your life), Manual errors (missed medications and allergies create real risk), Lost time (patients and staff burn time re-entering data), Caregiver burden (families struggle to keep medical details organized).
+
+SOLUTION
+Headline: Meet CareForm AI
+Subheadline: The healthcare intake passport.
+Body: A patient-owned intake profile that holds what nearly every provider asks for before treatment. Maintain it once, then share it securely with a QR code or temporary access code. One profile, one update, unlimited visits.
+Feature cards: Unified intake profile; Secure sharing with temporary QR and access codes; Patient-controlled access where you decide who sees it and for how long; AI intake review that flags missing information and writes a clinician-ready summary; Audit trail showing when your information was shared and viewed; Provider-ready clean, standardized data before it reaches their system.
+
+HOW IT WORKS
+Headline: Intake in three simple steps.
+Step 1, Create your CareForm: enter and update your intake whenever something changes.
+Step 2, Share securely: generate a QR code or access code before your appointment.
+Step 3, Provider reviews: your provider opens a standardized intake in seconds, on any device, with no app to install.
+
+FOR FAMILIES
+Headline: Built for families too.
+Story: Meet Robert. Robert is 74 and recently moved closer to his daughter. He takes several medications, has multiple allergies, and sees three specialists. Instead of redoing forms at every visit, his daughter keeps his CareForm current. When Robert sees a new cardiologist, everything is organized, complete, and ready to share.
+Caregiver benefits as small items: support aging parents, reduce paperwork stress, keep medications current, avoid missing critical information, simplify specialist visits.
+
+AI
+Headline: AI that helps patients stay prepared.
+Body: CareForm reviews the profile, flags missing or outdated details, scores completeness, and writes provider-ready summaries.
+Capabilities: completeness scoring, missing-field detection, provider-ready summaries, patient-friendly reminders, recent-change tracking.
+Disclaimer in small text: CareForm AI does not provide medical diagnosis, treatment recommendations, or clinical decision support.
+
+BUILT FOR THE FUTURE OF HEALTHCARE
+Headline: The missing front door to healthcare intake.
+Body: CareForm works alongside providers, not instead of them. It improves the quality and consistency of intake before it ever reaches a provider system, including Oracle Health. Oracle acquired Cerner, now Oracle Health, which makes CareForm the natural patient-side front door that feeds clean, standardized intake straight into the EHR.
+Architecture cards: Patient portal, Provider access gateway, Consent management, Audit and compliance layer, AI intake review engine, Integration API layer, OCI security foundation.
+Callout: Not an EHR replacement. The clean front door to it.
+
+FINAL CTA
+Headline: What if you never had to fill out the same health forms again?
+Subheadline: One secure profile. Every provider. Every visit.
+Primary CTA "Create my CareForm" routes to /patient. Secondary CTA "I'm a provider" routes to /provider.
+Footer tagline: CareForm AI. Healthcare intake made simple, secure, and patient controlled.
