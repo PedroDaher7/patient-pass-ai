@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { PatientInput, ReviewOfSystems } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,125 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, X, Upload } from "lucide-react";
+import { Plus, X, Upload, Sparkles } from "lucide-react";
+
+// ── AI normalize dictionaries ─────────────────────────────────────────────────
+const MED_NORMALIZE_MAP: Record<string, { formal: string; description: string }> = {
+  "water pill": { formal: "Hydrochlorothiazide (HCTZ)", description: "a diuretic" },
+  "water pills": { formal: "Hydrochlorothiazide (HCTZ)", description: "a diuretic" },
+  "blood thinner": { formal: "Warfarin (Coumadin)", description: "an anticoagulant" },
+  "blood thinners": { formal: "Warfarin (Coumadin)", description: "an anticoagulant" },
+  "blood pressure pill": { formal: "Lisinopril", description: "an ACE inhibitor for hypertension" },
+  "blood pressure medication": { formal: "Lisinopril", description: "an ACE inhibitor for hypertension" },
+  "sugar pill": { formal: "Metformin", description: "an oral antidiabetic for Type 2 diabetes" },
+  "diabetes pill": { formal: "Metformin", description: "an oral antidiabetic for Type 2 diabetes" },
+  "cholesterol pill": { formal: "Atorvastatin (Lipitor)", description: "a statin" },
+  "statin": { formal: "Atorvastatin (Lipitor)", description: "a statin for cholesterol" },
+  "sleeping pill": { formal: "Zolpidem (Ambien)", description: "a sleep aid" },
+  "sleep pill": { formal: "Zolpidem (Ambien)", description: "a sleep aid" },
+  "anxiety pill": { formal: "Lorazepam (Ativan)", description: "a benzodiazepine for anxiety" },
+  "acid pill": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor for acid reflux" },
+  "antacid": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor" },
+  "acid reflux pill": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor" },
+  "thyroid pill": { formal: "Levothyroxine (Synthroid)", description: "a thyroid hormone" },
+  "bone pill": { formal: "Alendronate (Fosamax)", description: "a bisphosphonate for osteoporosis" },
+  "steroid": { formal: "Prednisone", description: "a corticosteroid" },
+  "inhaler": { formal: "Albuterol", description: "a bronchodilator" },
+  "pain pill": { formal: "Ibuprofen or Acetaminophen", description: "specify if prescription or OTC" },
+};
+
+const COND_NORMALIZE_MAP: Record<string, { formal: string; description: string }> = {
+  "high blood pressure": { formal: "Hypertension", description: "elevated blood pressure" },
+  "high bp": { formal: "Hypertension", description: "elevated blood pressure" },
+  "sugar diabetes": { formal: "Type 2 Diabetes Mellitus", description: "a metabolic disorder" },
+  "high cholesterol": { formal: "Hyperlipidemia", description: "elevated blood lipids" },
+  "overweight": { formal: "Obesity", description: "specify BMI class with your doctor" },
+  "low thyroid": { formal: "Hypothyroidism", description: "underactive thyroid" },
+  "underactive thyroid": { formal: "Hypothyroidism", description: "underactive thyroid" },
+  "acid reflux": { formal: "Gastroesophageal Reflux Disease (GERD)", description: "a stomach acid disorder" },
+  "heartburn": { formal: "Gastroesophageal Reflux Disease (GERD)", description: "a stomach acid disorder" },
+  "irregular heartbeat": { formal: "Atrial Fibrillation (AFib)", description: "an irregular heart rhythm" },
+  "heart flutter": { formal: "Atrial Fibrillation (AFib)", description: "an irregular heart rhythm" },
+  "weak heart": { formal: "Congestive Heart Failure (CHF)", description: "reduced heart pumping capacity" },
+  "depression": { formal: "Major Depressive Disorder (MDD)", description: "a mood disorder" },
+  "anxiety": { formal: "Generalized Anxiety Disorder (GAD)", description: "an anxiety disorder" },
+  "copd": { formal: "Chronic Obstructive Pulmonary Disease (COPD)", description: "a chronic lung condition" },
+  "arthritis": { formal: "Osteoarthritis", description: "specify joint and type with your doctor" },
+};
+
+function findNormalize(
+  text: string,
+  map: Record<string, { formal: string; description: string }>
+): { formal: string; description: string } | null {
+  const lower = text.trim().toLowerCase();
+  if (!lower) return null;
+  return map[lower] ?? null;
+}
+
+function NormalizeSuggestion({
+  suggestion,
+  onApply,
+}: {
+  suggestion: { formal: string; description: string };
+  onApply: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+      <Sparkles className="w-3 h-3 text-blue-500 flex-shrink-0" />
+      <span className="text-xs text-slate-600 flex-1 min-w-0">
+        AI suggests: <strong className="text-slate-800">{suggestion.formal}</strong>
+        <span className="text-slate-400 ml-1">({suggestion.description})</span>
+      </span>
+      <button
+        type="button"
+        onClick={onApply}
+        className="text-xs font-semibold text-blue-700 hover:text-blue-900 transition-colors flex-shrink-0 whitespace-nowrap"
+      >
+        Use this ↵
+      </button>
+    </div>
+  );
+}
+
+function MedNameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [suggestion, setSuggestion] = useState<{ formal: string; description: string } | null>(null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    onChange(val);
+    setSuggestion(findNormalize(val, MED_NORMALIZE_MAP));
+  };
+  return (
+    <div className="space-y-1.5">
+      <Input value={value} onChange={handleChange} placeholder="e.g. Metformin, Lisinopril" />
+      {suggestion && (
+        <NormalizeSuggestion
+          suggestion={suggestion}
+          onApply={() => { onChange(suggestion.formal); setSuggestion(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CondNameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [suggestion, setSuggestion] = useState<{ formal: string; description: string } | null>(null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    onChange(val);
+    setSuggestion(findNormalize(val, COND_NORMALIZE_MAP));
+  };
+  return (
+    <div className="space-y-1.5">
+      <Input value={value} onChange={handleChange} placeholder="e.g. Type 2 Diabetes, Hypertension" />
+      {suggestion && (
+        <NormalizeSuggestion
+          suggestion={suggestion}
+          onApply={() => { onChange(suggestion.formal); setSuggestion(null); }}
+        />
+      )}
+    </div>
+  );
+}
 
 export type Handlers = {
   handleChange: (field: keyof PatientInput, value: unknown) => void;
@@ -297,7 +416,7 @@ export function renderEditForm(section: string, data: PatientInput, h: Handlers)
           renderItem={(m, i) => (
             <div className="space-y-3">
               <div className="grid grid-cols-12 gap-3">
-                <div className="col-span-4"><Fld label="Name"><Input value={m.name} onChange={e => h.handleArrayChange("medications",i,"name",e.target.value)} /></Fld></div>
+                <div className="col-span-4"><Fld label="Name"><MedNameInput value={m.name} onChange={val => h.handleArrayChange("medications",i,"name",val)} /></Fld></div>
                 <div className="col-span-3"><Fld label="Dose"><Input value={m.dose} onChange={e => h.handleArrayChange("medications",i,"dose",e.target.value)} /></Fld></div>
                 <div className="col-span-3"><Fld label="Frequency"><Input value={m.frequency} onChange={e => h.handleArrayChange("medications",i,"frequency",e.target.value)} /></Fld></div>
                 <div className="col-span-2"><Fld label="Route">
@@ -325,7 +444,7 @@ export function renderEditForm(section: string, data: PatientInput, h: Handlers)
           addLabel="Add Condition" emptyLabel="No conditions recorded"
           renderItem={(c, i) => (
             <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-5"><Fld label="Condition"><Input value={c.name} onChange={e => h.handleArrayChange("conditions",i,"name",e.target.value)} /></Fld></div>
+              <div className="col-span-5"><Fld label="Condition"><CondNameInput value={c.name} onChange={val => h.handleArrayChange("conditions",i,"name",val)} /></Fld></div>
               <div className="col-span-2"><Fld label="Diagnosed"><Input value={c.diagnosedDate || ""} onChange={e => h.handleArrayChange("conditions",i,"diagnosedDate",e.target.value)} placeholder="YYYY-MM" /></Fld></div>
               <div className="col-span-2"><Fld label="Status">
                 <Select value={c.status} onValueChange={v => h.handleArrayChange("conditions",i,"status",v)}>

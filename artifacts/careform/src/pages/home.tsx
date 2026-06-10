@@ -23,6 +23,7 @@ import {
   User, Activity, Building2, Shield, Phone,
   Pill, HeartPulse, FileText, Syringe, Users,
   Briefcase, Pencil, History, ClipboardList, RotateCcw, Pen,
+  Sparkles,
 } from "lucide-react";
 import { renderEditForm, type Handlers, ROS_SYSTEMS } from "./home-edit-forms";
 
@@ -211,6 +212,55 @@ function useCountdown(expiresAt: string | null | undefined) {
   return timeLeft;
 }
 
+// ── AI flags ──────────────────────────────────────────────────────────────────
+type AIFlag = { title: string; suggestion: string };
+
+function computeAIFlags(data: PatientInput): AIFlag[] {
+  const flags: AIFlag[] = [];
+  const today = new Date();
+  const msPerDay = 1000 * 60 * 60 * 24;
+
+  const immunizations = data.immunizations as { vaccine: string; date: string }[];
+
+  // Flag: COVID booster age > 18 months
+  const covidVax = immunizations.find(i => i.vaccine.toLowerCase().includes("covid"));
+  if (covidVax?.date) {
+    const vaxDate = new Date(covidVax.date + "T00:00:00");
+    const daysAgo = (today.getTime() - vaxDate.getTime()) / msPerDay;
+    if (daysAgo > 540) {
+      const months = Math.floor(daysAgo / 30);
+      const label = months >= 24 ? `${Math.floor(months / 12)} years` : `${months} months`;
+      flags.push({
+        title: `COVID-19 booster is ${label} old`,
+        suggestion: "Consider asking your doctor whether an updated COVID-19 booster is recommended for you.",
+      });
+    }
+  }
+
+  // Flag: secondary insurance group is N/A or blank
+  const sec = data.insuranceSecondary as Record<string, string> | null;
+  if (sec) {
+    const grp = (sec.group ?? "").trim();
+    if (grp === "" || grp.toUpperCase() === "N/A") {
+      flags.push({
+        title: "Secondary insurance group number may need verification",
+        suggestion: `Your secondary plan (${sec.plan || "unknown"}) shows group as "${grp || "blank"}." Confirm this is correct before your visit.`,
+      });
+    }
+  }
+
+  // Flag: vitals are patient-reported
+  const v = data.vitals as Record<string, string>;
+  if (v.systolic || v.weightLbs) {
+    flags.push({
+      title: "Vitals are self-reported",
+      suggestion: "If you have more recent measurements from a clinic visit or home monitor, update them before sharing your pass.",
+    });
+  }
+
+  return flags;
+}
+
 // ── Small display components ───────────────────────────────────────────────────
 function CompletenessRing({ pct }: { pct: number }) {
   const r = 26;
@@ -270,6 +320,138 @@ function Chip({ children }: { children: React.ReactNode }) {
     <span className="inline-flex items-center bg-white/15 text-white text-xs font-medium px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
       {children}
     </span>
+  );
+}
+
+// ── CarePass AI Review card ────────────────────────────────────────────────────
+function CarePassAIReview({ formData, completeness }: { formData: PatientInput; completeness: number }) {
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [visitSummary, setVisitSummary] = useState<{ summary: string; questions: string[] } | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
+  const flags = computeAIFlags(formData);
+
+  const readiness =
+    completeness >= 90 ? "Your CarePass is complete and ready to share."
+    : completeness >= 70 ? "Your CarePass is almost ready — a few items to review."
+    : "Your CarePass needs some attention before your visit.";
+
+  const badgeClass =
+    completeness >= 90 ? "bg-green-50 text-green-700"
+    : completeness >= 70 ? "bg-amber-50 text-amber-700"
+    : "bg-red-50 text-red-600";
+
+  const handleGenerateSummary = async () => {
+    setLoadingSummary(true);
+    setSummaryError(null);
+    try {
+      const res = await fetch("/api/ai-patient-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patient: formData }),
+      });
+      if (!res.ok) throw new Error("Request failed");
+      const data = await res.json() as { summary: string; questions: string[] };
+      setVisitSummary(data);
+    } catch {
+      setSummaryError("Could not generate summary. Please try again.");
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-blue-100 shadow-sm mt-5 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-blue-50 bg-gradient-to-r from-blue-50/60 to-white">
+        <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+          <Sparkles className="w-4 h-4 text-white" strokeWidth={1.75} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-sm font-semibold text-slate-800">CarePass AI Review</h2>
+          <p className="text-[11px] text-slate-400 leading-tight">Personalized readiness check for your visit</p>
+        </div>
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${badgeClass}`}>
+          {completeness}% complete
+        </span>
+      </div>
+
+      <div className="p-5 space-y-5">
+        {/* Readiness status */}
+        <div className="flex items-center gap-2.5">
+          {completeness >= 90
+            ? <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+            : <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+          <p className="text-sm font-medium text-slate-700">{readiness}</p>
+        </div>
+
+        {/* AI-detected flags */}
+        {flags.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2.5">Things to review before your visit</p>
+            <div className="space-y-2">
+              {flags.map((flag, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 bg-amber-50/70 border border-amber-100 rounded-xl px-3.5 py-3">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-800 leading-snug">{flag.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{flag.suggestion}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Visit prep */}
+        <div>
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2.5">Visit prep</p>
+          {!visitSummary ? (
+            <div className="flex flex-col items-start gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+                onClick={handleGenerateSummary}
+                disabled={loadingSummary}
+              >
+                {loadingSummary
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <Sparkles className="w-3.5 h-3.5" />}
+                {loadingSummary ? "Generating…" : "Generate visit summary"}
+              </Button>
+              {summaryError && <p className="text-xs text-red-500">{summaryError}</p>}
+            </div>
+          ) : (
+            <div className="bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-4">
+              <p className="text-sm text-slate-700 leading-relaxed">{visitSummary.summary}</p>
+              <div>
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2.5">3 questions to ask your doctor today</p>
+                <ol className="space-y-2.5">
+                  {visitSummary.questions.map((q, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
+                      <span className="font-bold text-blue-600 flex-shrink-0 w-4 text-center leading-snug">{idx + 1}.</span>
+                      <span className="leading-snug">{q}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <button
+                onClick={() => setVisitSummary(null)}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Clear summary
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-[10px] text-slate-400 leading-relaxed border-t border-slate-100 pt-4">
+          CarePass AI helps you stay organized and prepared. It does not provide medical diagnosis or treatment advice.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -889,6 +1071,9 @@ export default function Home() {
             <CompletenessRing pct={completeness} />
           </div>
         </div>
+
+        {/* CarePass AI Review */}
+        <CarePassAIReview formData={formData} completeness={completeness} />
 
         {/* Pass Panel */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm mt-5 overflow-hidden">
