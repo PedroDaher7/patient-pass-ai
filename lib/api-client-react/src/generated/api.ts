@@ -27,7 +27,8 @@ import type {
   ErrorResponse,
   HealthStatus,
   Patient,
-  PatientInput
+  PatientInput,
+  SharedPassList
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -344,6 +345,155 @@ export function useGetActivePass<TData = Awaited<ReturnType<typeof getActivePass
 
 
 
+
+export const getGetSharedWithUrl = (id: string,) => {
+
+
+
+
+  return `/api/patient/${id}/shared-with`
+}
+
+/**
+ * @summary Get the full list of providers this patient has shared their CarePass with
+ */
+export const getSharedWith = async (id: string, options?: RequestInit): Promise<SharedPassList> => {
+
+  return customFetch<SharedPassList>(getGetSharedWithUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSharedWithQueryKey = (id: string,) => {
+    return [
+    `/api/patient/${id}/shared-with`
+    ] as const;
+    }
+
+
+export const getGetSharedWithQueryOptions = <TData = Awaited<ReturnType<typeof getSharedWith>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedWith>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSharedWithQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSharedWith>>> = ({ signal }) => getSharedWith(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSharedWith>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSharedWithQueryResult = NonNullable<Awaited<ReturnType<typeof getSharedWith>>>
+export type GetSharedWithQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the full list of providers this patient has shared their CarePass with
+ */
+
+export function useGetSharedWith<TData = Awaited<ReturnType<typeof getSharedWith>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedWith>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSharedWithQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getRevokeSharedPassUrl = (id: string,
+    code: string,) => {
+
+
+
+
+  return `/api/patient/${id}/shared-with/${code}/revoke`
+}
+
+/**
+ * @summary Revoke a specific shared pass by code
+ */
+export const revokeSharedPass = async (id: string,
+    code: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRevokeSharedPassUrl(id,code),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRevokeSharedPassMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeSharedPass>>, TError,{id: string;code: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeSharedPass>>, TError,{id: string;code: string}, TContext> => {
+
+const mutationKey = ['revokeSharedPass'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeSharedPass>>, {id: string;code: string}> = (props) => {
+          const {id,code} = props ?? {};
+
+          return  revokeSharedPass(id,code,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeSharedPassMutationResult = NonNullable<Awaited<ReturnType<typeof revokeSharedPass>>>
+
+    export type RevokeSharedPassMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Revoke a specific shared pass by code
+ */
+export const useRevokeSharedPass = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeSharedPass>>, TError,{id: string;code: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeSharedPass>>,
+        TError,
+        {id: string;code: string},
+        TContext
+      > => {
+      return useMutation(getRevokeSharedPassMutationOptions(options));
+    }
 
 export const getGetAccessHistoryUrl = (id: string,) => {
 

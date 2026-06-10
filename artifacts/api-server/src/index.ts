@@ -1,6 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { seedDemoPatient } from "./lib/seed";
+import { seedDemoPatient, seedDemoSharedPasses } from "./lib/seed";
 import { pool } from "@workspace/db";
 
 pool.on("error", (err) => {
@@ -29,4 +29,5 @@ app.listen(port, async (err) => {
 
   logger.info({ port }, "Server listening");
   await seedDemoPatient();
+  await seedDemoSharedPasses();
 });

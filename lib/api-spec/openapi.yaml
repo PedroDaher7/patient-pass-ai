@@ -109,6 +109,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /patient/{id}/shared-with:
+    get:
+      operationId: getSharedWith
+      tags: [patient]
+      summary: Get the full list of providers this patient has shared their CarePass with
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shared-with list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedPassList"
+        "404":
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /patient/{id}/shared-with/{code}/revoke:
+    delete:
+      operationId: revokeSharedPass
+      tags: [patient]
+      summary: Revoke a specific shared pass by code
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Pass revoked
+        "404":
+          description: Shared pass not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /patient/{id}/access-history:
     get:
       operationId: getAccessHistory
@@ -565,6 +616,52 @@ components:
         - text
         - dataUrl
         - date
+
+    SharedPass:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        patientId:
+          type: string
+        providerName:
+          type: ["string", "null"]
+        specialty:
+          type: ["string", "null"]
+        sharedAt:
+          type: string
+        expiresAt:
+          type: string
+        lastViewedAt:
+          type: ["string", "null"]
+        revokedAt:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, expired, revoked]
+      required:
+        - id
+        - code
+        - patientId
+        - providerName
+        - specialty
+        - sharedAt
+        - expiresAt
+        - lastViewedAt
+        - revokedAt
+        - status
+
+    SharedPassList:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/SharedPass"
+      required:
+        - entries
 
     RecentUpdate:
       type: object

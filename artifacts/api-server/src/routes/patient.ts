@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
-import { db, patientsTable, accessCodesTable, accessHistoryTable } from "@workspace/db";
+import { db, patientsTable, accessCodesTable, accessHistoryTable, sharedPassesTable } from "@workspace/db";
 import {
   GetPatientParams,
   GetPatientResponse,
@@ -11,6 +11,9 @@ import {
   GetActivePassResponse,
   GetAccessHistoryParams,
   GetAccessHistoryResponse,
+  GetSharedWithParams,
+  GetSharedWithResponse,
+  RevokeSharedPassParams,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -166,6 +169,94 @@ router.get("/patient/:id/pass", async (req, res): Promise<void> => {
   }
 
   res.json(GetActivePassResponse.parse(serializeCode(pass)));
+});
+
+router.get("/patient/:id/shared-with", async (req, res): Promise<void> => {
+  const params = GetSharedWithParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message, errorCode: "INVALID_REQUEST" });
+    return;
+  }
+
+  const [patient] = await db
+    .select({ id: patientsTable.id })
+    .from(patientsTable)
+    .where(eq(patientsTable.id, params.data.id));
+
+  if (!patient) {
+    res.status(404).json({ error: "Patient not found", errorCode: "PATIENT_NOT_FOUND" });
+    return;
+  }
+
+  const entries = await db
+    .select()
+    .from(sharedPassesTable)
+    .where(eq(sharedPassesTable.patientId, params.data.id))
+    .orderBy(desc(sharedPassesTable.sharedAt));
+
+  const now = new Date();
+
+  res.json(GetSharedWithResponse.parse({
+    entries: entries.map(e => {
+      const expiresAt = e.expiresAt instanceof Date ? e.expiresAt : new Date(String(e.expiresAt));
+      const status = e.revokedAt !== null ? "revoked" : expiresAt < now ? "expired" : "active";
+      return {
+        id: e.id,
+        code: e.code,
+        patientId: e.patientId,
+        providerName: e.providerName ?? null,
+        specialty: e.specialty ?? null,
+        sharedAt: e.sharedAt instanceof Date ? e.sharedAt.toISOString() : String(e.sharedAt),
+        expiresAt: expiresAt.toISOString(),
+        lastViewedAt: e.lastViewedAt instanceof Date ? e.lastViewedAt.toISOString() : e.lastViewedAt ?? null,
+        revokedAt: e.revokedAt instanceof Date ? e.revokedAt.toISOString() : e.revokedAt ?? null,
+        status,
+      };
+    }),
+  }));
+});
+
+router.delete("/patient/:id/shared-with/:code/revoke", async (req, res): Promise<void> => {
+  const params = RevokeSharedPassParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message, errorCode: "INVALID_REQUEST" });
+    return;
+  }
+
+  const [entry] = await db
+    .select({ id: sharedPassesTable.id })
+    .from(sharedPassesTable)
+    .where(and(
+      eq(sharedPassesTable.patientId, params.data.id),
+      eq(sharedPassesTable.code, params.data.code),
+    ));
+
+  if (!entry) {
+    res.status(404).json({ error: "Shared pass not found", errorCode: "SHARED_PASS_NOT_FOUND" });
+    return;
+  }
+
+  const revokedAt = new Date();
+
+  await db
+    .update(sharedPassesTable)
+    .set({ revokedAt })
+    .where(and(
+      eq(sharedPassesTable.patientId, params.data.id),
+      eq(sharedPassesTable.code, params.data.code),
+    ));
+
+  // Also revoke in access codes if the code is still there
+  await db
+    .update(accessCodesTable)
+    .set({ revokedAt })
+    .where(and(
+      eq(accessCodesTable.code, params.data.code),
+      isNull(accessCodesTable.revokedAt),
+    ));
+
+  req.log.info({ code: params.data.code, patientId: params.data.id }, "Shared pass revoked");
+  res.sendStatus(204);
 });
 
 router.get("/patient/:id/access-history", async (req, res): Promise<void> => {

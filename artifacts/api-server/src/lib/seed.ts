@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db, patientsTable } from "@workspace/db";
+import { db, patientsTable, sharedPassesTable } from "@workspace/db";
 import { logger } from "./logger";
 
 const TODAY = "2026-06-10";
@@ -311,6 +311,61 @@ const DEMO_PATIENT = {
 };
 
 export { DEMO_PATIENT };
+
+export async function seedDemoSharedPasses(): Promise<void> {
+  try {
+    await db.delete(sharedPassesTable).where(eq(sharedPassesTable.patientId, "demo"));
+
+    const now = new Date();
+
+    await db.insert(sharedPassesTable).values([
+      {
+        code: "HIST01",
+        patientId: "demo",
+        providerName: "Dr. Ramesh Patel, MD",
+        specialty: "Primary Care",
+        sharedAt: new Date("2026-05-12T09:00:00Z"),
+        expiresAt: new Date("2026-05-12T13:00:00Z"),
+        lastViewedAt: new Date("2026-05-12T09:45:00Z"),
+        revokedAt: null,
+      },
+      {
+        code: "HIST02",
+        patientId: "demo",
+        providerName: "Austin Cardiology Associates",
+        specialty: "Cardiology",
+        sharedAt: new Date("2026-06-03T10:00:00Z"),
+        expiresAt: new Date("2026-06-03T14:00:00Z"),
+        lastViewedAt: new Date("2026-06-04T08:30:00Z"),
+        revokedAt: null,
+      },
+      {
+        code: "HIST03",
+        patientId: "demo",
+        providerName: "Westlake Imaging Center",
+        specialty: "Radiology",
+        sharedAt: new Date("2026-05-28T14:00:00Z"),
+        expiresAt: new Date("2026-05-28T18:00:00Z"),
+        lastViewedAt: new Date("2026-05-28T14:30:00Z"),
+        revokedAt: null,
+      },
+      {
+        code: "ENDO01",
+        patientId: "demo",
+        providerName: "Austin Endocrinology Group",
+        specialty: "Endocrinology",
+        sharedAt: now,
+        expiresAt: new Date(now.getTime() + 3 * 60 * 60 * 1000),
+        lastViewedAt: now,
+        revokedAt: null,
+      },
+    ]);
+
+    logger.info("Demo shared passes seeded successfully");
+  } catch (err) {
+    logger.error({ err }, "Failed to seed demo shared passes");
+  }
+}
 
 export async function seedDemoPatient(): Promise<void> {
   try {

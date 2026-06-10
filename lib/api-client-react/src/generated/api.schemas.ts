@@ -156,6 +156,36 @@ export interface PatientSignature {
   date: string;
 }
 
+export type SharedPassStatus = typeof SharedPassStatus[keyof typeof SharedPassStatus];
+
+
+export const SharedPassStatus = {
+  active: 'active',
+  expired: 'expired',
+  revoked: 'revoked',
+} as const;
+
+export interface SharedPass {
+  id: number;
+  code: string;
+  patientId: string;
+  /** @nullable */
+  providerName: string | null;
+  /** @nullable */
+  specialty: string | null;
+  sharedAt: string;
+  expiresAt: string;
+  /** @nullable */
+  lastViewedAt: string | null;
+  /** @nullable */
+  revokedAt: string | null;
+  status: SharedPassStatus;
+}
+
+export interface SharedPassList {
+  entries: SharedPass[];
+}
+
 export interface RecentUpdate {
   category: string;
   label: string;

@@ -553,6 +553,38 @@ export const GetActivePassResponse = zod.object({
 
 
 /**
+ * @summary Get the full list of providers this patient has shared their CarePass with
+ */
+export const GetSharedWithParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetSharedWithResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.number(),
+  "code": zod.string(),
+  "patientId": zod.string(),
+  "providerName": zod.string().nullable(),
+  "specialty": zod.string().nullable(),
+  "sharedAt": zod.string(),
+  "expiresAt": zod.string(),
+  "lastViewedAt": zod.string().nullable(),
+  "revokedAt": zod.string().nullable(),
+  "status": zod.enum(['active', 'expired', 'revoked'])
+}))
+})
+
+
+/**
+ * @summary Revoke a specific shared pass by code
+ */
+export const RevokeSharedPassParams = zod.object({
+  "id": zod.coerce.string(),
+  "code": zod.coerce.string()
+})
+
+
+/**
  * @summary Get the access history for a patient
  */
 export const GetAccessHistoryParams = zod.object({

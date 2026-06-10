@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, gt, isNull, lt } from "drizzle-orm";
-import { db, patientsTable, accessCodesTable, accessHistoryTable } from "@workspace/db";
+import { db, patientsTable, accessCodesTable, accessHistoryTable, sharedPassesTable } from "@workspace/db";
 import {
   CreateCodeBody,
   ValidateCodeParams,
@@ -63,15 +63,29 @@ router.post("/codes", async (req, res): Promise<void> => {
   // Clean up old expired codes
   await db.delete(accessCodesTable).where(lt(accessCodesTable.expiresAt, new Date()));
 
+  const revokeNow = new Date();
+
   // Revoke any existing active codes for this patient
   await db
     .update(accessCodesTable)
-    .set({ revokedAt: new Date() })
+    .set({ revokedAt: revokeNow })
     .where(
       and(
         eq(accessCodesTable.patientId, patientId),
-        gt(accessCodesTable.expiresAt, new Date()),
+        gt(accessCodesTable.expiresAt, revokeNow),
         isNull(accessCodesTable.revokedAt),
+      ),
+    );
+
+  // Mirror the revocation in shared passes
+  await db
+    .update(sharedPassesTable)
+    .set({ revokedAt: revokeNow })
+    .where(
+      and(
+        eq(sharedPassesTable.patientId, patientId),
+        gt(sharedPassesTable.expiresAt, revokeNow),
+        isNull(sharedPassesTable.revokedAt),
       ),
     );
 
@@ -82,6 +96,9 @@ router.post("/codes", async (req, res): Promise<void> => {
     .insert(accessCodesTable)
     .values({ code, patientId, expiresAt })
     .returning();
+
+  // Record in shared passes audit trail
+  await db.insert(sharedPassesTable).values({ code, patientId, expiresAt });
 
   req.log.info({ patientId, code, expiresAt }, "Access code created");
   res.status(201).json(serializeCode(created));
@@ -142,6 +159,12 @@ router.get("/codes/:code", async (req, res): Promise<void> => {
     patientId: entry.patientId,
   });
 
+  // Update lastViewedAt in shared passes
+  await db
+    .update(sharedPassesTable)
+    .set({ lastViewedAt: new Date() })
+    .where(eq(sharedPassesTable.code, entry.code));
+
   req.log.info({ code: params.data.code, patientId: entry.patientId }, "Code validated and view logged");
   res.json(ValidateCodeResponse.parse({
     patient: serializePatient(patient),
@@ -167,10 +190,18 @@ router.delete("/codes/:code", async (req, res): Promise<void> => {
     return;
   }
 
+  const revokedAt = new Date();
+
   await db
     .update(accessCodesTable)
-    .set({ revokedAt: new Date() })
+    .set({ revokedAt })
     .where(eq(accessCodesTable.code, params.data.code));
+
+  // Mirror revocation in shared passes
+  await db
+    .update(sharedPassesTable)
+    .set({ revokedAt })
+    .where(eq(sharedPassesTable.code, params.data.code));
 
   req.log.info({ code: params.data.code }, "Access code revoked");
   res.sendStatus(204);
