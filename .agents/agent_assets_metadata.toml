@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "dMDNhqLbSd0Me-yHSsLiK"
+uri = "file://patientpass-ai-source.tar.gz"
+type = "unspecified"
+title = "PatientPass AI — Source Code"
