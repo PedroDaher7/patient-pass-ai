@@ -599,20 +599,15 @@ function AISummaryPanel({
             ? <Loader2 className="w-3 h-3 animate-spin" />
             : <Sparkles className="w-3 h-3" />
           }
-          {summary ? "Refresh" : "Generate"}
+          {summary ? "Regenerate" : loading ? "Generating…" : "Generate"}
         </Button>
       </div>
       <div className="px-5 py-4 min-h-[64px]">
         {loading && (
           <div className="flex items-center gap-2.5 text-slate-500 text-sm">
             <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-            Generating clinical summary…
+            Generating AI clinical summary…
           </div>
-        )}
-        {!loading && !summary && !error && (
-          <p className="text-sm text-slate-400 italic">
-            Click <span className="font-medium text-slate-500 not-italic">Generate</span> for a structured narrative from this patient's intake data.
-          </p>
         )}
         {!loading && summary && (
           <p className="text-sm text-slate-700 leading-relaxed">{summary}</p>
@@ -631,26 +626,13 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
 
   const [activeTab,    setActiveTab]    = useState("demographics");
   const [summary,      setSummary]      = useState<string | null>(null);
-  const [summLoading,  setSummLoading]  = useState(false);
+  const [summLoading,  setSummLoading]  = useState(true);
   const [summError,    setSummError]    = useState<string | null>(null);
   const [isReviewed,   setIsReviewed]   = useState(false);
   const [copied,       setCopied]       = useState(false);
   const [notes,        setNotes]        = useState(() => localStorage.getItem(`pnotes-${p.id}`) ?? "");
 
   useEffect(() => { localStorage.setItem(`pnotes-${p.id}`, notes); }, [notes, p.id]);
-
-  const allergies   = p.allergies  as AllergyT[];
-  const medications = p.medications as MedT[];
-  const conditions  = p.conditions  as ConditionT[];
-  const consentsObj = p.consents    as unknown as Record<string, ConsentItemT>;
-  const ct          = p.careTeam    as unknown as Record<string, string>;
-  const activeCount = conditions.filter(c => c.status === "Active").length;
-  const signedCount = Object.values(consentsObj).filter(c => c?.agreed).length;
-
-  const recentUpdates = (p.recentUpdates ?? []) as RecentUpdateT[];
-  const lastViewedDate = data.lastViewedAt ? data.lastViewedAt.split("T")[0] : null;
-  const newUpdates = recentUpdates.filter(u => !lastViewedDate || u.updatedAt >= lastViewedDate);
-  const medUpdatedLabels = new Set(newUpdates.filter(u => u.category === "medications").map(u => u.label));
 
   const generateSummary = useCallback(async () => {
     setSummLoading(true);
@@ -670,6 +652,21 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
       setSummLoading(false);
     }
   }, [p]);
+
+  useEffect(() => { generateSummary(); }, [generateSummary]); // auto-generate on mount
+
+  const allergies   = p.allergies  as AllergyT[];
+  const medications = p.medications as MedT[];
+  const conditions  = p.conditions  as ConditionT[];
+  const consentsObj = p.consents    as unknown as Record<string, ConsentItemT>;
+  const ct          = p.careTeam    as unknown as Record<string, string>;
+  const activeCount = conditions.filter(c => c.status === "Active").length;
+  const signedCount = Object.values(consentsObj).filter(c => c?.agreed).length;
+
+  const recentUpdates = (p.recentUpdates ?? []) as RecentUpdateT[];
+  const lastViewedDate = data.lastViewedAt ? data.lastViewedAt.split("T")[0] : null;
+  const newUpdates = recentUpdates.filter(u => !lastViewedDate || u.updatedAt >= lastViewedDate);
+  const medUpdatedLabels = new Set(newUpdates.filter(u => u.category === "medications").map(u => u.label));
 
   const handleCopyEHR = useCallback(async () => {
     await navigator.clipboard.writeText(formatPatientText(p));
