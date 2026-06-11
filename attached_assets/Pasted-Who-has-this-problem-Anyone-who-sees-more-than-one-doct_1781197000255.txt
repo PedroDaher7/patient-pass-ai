@@ -1,0 +1,27 @@
+Who has this problem?
+Anyone who sees more than one doctor has this problem, which is most patients.
+Imagine Maria, 54, who manages diabetes and high blood pressure. She sees a primary care doctor, an endocrinologist, and occasionally an urgent care or specialist. At every new office, she has to rewrite the same information from memory: medications, allergies, surgeries, insurance, emergency contacts, and medical history.
+That process wastes 15 to 20 minutes per visit and creates real risk. A forgotten medication dose, a misspelled drug, or an omitted allergy can lead to bad clinical decisions. Then front desk staff often re-enter that same handwritten information manually into systems like Epic, Cerner, or Oracle Health, introducing even more chances for error.
+The burden is highest for older adults, caregivers managing a parent’s care, patients with long medication lists, people with chronic conditions, and anyone arriving in an ER or urgent care setting. But it also affects clinics and hospitals: staff lose time re-keying forms, providers start visits with incomplete information, and patients repeat the same paperwork across disconnected systems.
+This is a simple, frustrating problem that happens at massive scale across healthcare: patients carry their own medical intake history in memory, paper forms, screenshots, and portal fragments.
+
+How does your app solve it?
+Our app replaces the clipboard with a patient-controlled, reusable medical intake pass.
+The patient fills out their intake once, keeps it updated on their own time, and shares it with any provider in seconds using a QR code or six-digit access code. There is nothing for the provider to install. They open a clean, standardized intake view that includes key medical history, medications, allergies, emergency contacts, insurance details, and visit reason.
+The provider view highlights safety-critical information first, including allergy alerts, and includes an AI-generated clinician summary that turns a long intake form into a fast, useful clinical brief. It also shows what the patient changed since the last visit, so staff and clinicians can quickly see what is new instead of rereading everything.
+The patient stays in control of who can access the information and for how long.
+The impact is immediate: no clipboard, faster check-in, fewer manual transcription errors, and more complete information before the visit begins.
+Existing alternatives do not solve this workflow well. Paper forms have to be redone every visit. EHR portals like MyChart are usually locked to one health system. Consumer health apps may store records, but they do not produce a clean, standardized intake that a front desk or clinician can use at the point of care.
+The key demo workflow is simple: the patient generates a share code, the provider opens the intake pass, and instantly sees the full record, AI clinician summary, allergy alert, and recent updates — with no new paperwork.
+
+How did you build it?
+We built a working full-stack web app on Replit that can be used immediately, including by the judging app. It does not require a login, which keeps the demo fast and accessible.
+The front end is built in React. The backend uses Node.js and Express, with Replit Database for storage. Sharing works through QR codes and time-limited six-digit access codes.
+The AI runs server-side and does more than fill a template. It helps normalize patient-entered language into clinical terms — for example, interpreting “water pill” as hydrochlorothiazide — and generates a clinician-facing summary from the patient’s conditions, medications, allergies, and visit reason. We also built in a fallback path so the demo remains reliable even if the AI call fails.
+The app is provider-agnostic and uses only synthetic data, with no real patient information. That makes it safe for demo use while still showing how the workflow could scale across patients, clinics, urgent care centers, and hospitals.
+With more time, the next step is to make the app FHIR-ready so standardized intake data can write directly into Oracle Health and other EHR systems on Oracle Cloud Infrastructure. We would also add real provider accounts, stronger identity controls, audit logs, and multi-language support so the intake pass can work for a broader patient population.
+
+What did you build?
+We built PatientPass AI, a working patient-controlled healthcare intake pass with three parts, all usable with no login: a landing page that explains the product, a patient side, and a provider side.
+On the patient side, the user maintains one complete, standardized intake: demographics, insurance, care team, pharmacy, medications, allergies, conditions, surgeries, hospitalizations, immunizations, family and social history, review of systems, vitals, and signed consents with a signature. They get a completeness score, an AI review that flags missing or outdated details and writes a visit summary, and a shareable pass with a QR code and a six-digit code, plus a history of every provider who has viewed it.
+On the provider side, entering the code or scanning the QR opens a clean practice dashboard with the patient's full standardized record, a red allergy alert, an AI clinician summary, clinical snapshot stats, signed consents, and a banner showing exactly what the patient updated since the last visit. The AI runs live on real input, turning plain language into standardized clinical terms and writing the summary. The whole thing runs on a synthetic demo patient with no real data.
