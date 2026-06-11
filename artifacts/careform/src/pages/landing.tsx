@@ -598,10 +598,21 @@ export default function Landing() {
                     AI that helps patients stay prepared.
                   </h2>
                 </FadeIn>
-                <FadeIn delay={100} className="mb-8">
+                <FadeIn delay={100} className="mb-6">
                   <p className="text-slate-500 text-lg leading-relaxed">
                     PatientPass reviews the profile, flags missing or outdated details, scores completeness, and writes provider-ready summaries — all from the intake data you've already provided.
                   </p>
+                </FadeIn>
+                <FadeIn delay={120} className="mb-8">
+                  <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-5 space-y-3">
+                    <p className="text-sm font-semibold text-slate-700">How the AI works</p>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      When a patient types a lay term — "water pill," "the heart thing," "sugar" — PatientPass calls GPT-4o mini to normalize it into clinical terminology (Hydrochlorothiazide, Atrial Fibrillation, Type 2 Diabetes Mellitus) before saving. A rule-based engine then scores profile completeness, detects outdated fields such as an 18-month-old vaccine booster, and surfaces specific action items to the patient.
+                    </p>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      When a provider opens a patient record, GPT-4o generates a structured clinical narrative automatically — synthesizing reason for visit, active conditions, current medications, allergy alerts, and vitals into a paragraph a clinician can read in seconds. No button click required.
+                    </p>
+                  </div>
                 </FadeIn>
                 <FadeIn delay={150}>
                   <p className="text-xs text-slate-400 leading-relaxed border border-slate-100 rounded-xl p-4 bg-slate-50">
@@ -650,6 +661,19 @@ export default function Landing() {
               </p>
             </FadeIn>
 
+            {/* Architecture: readable prose for automated readers */}
+            <FadeIn delay={130} className="mb-10">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+                <p className="text-sm font-semibold text-blue-300 uppercase tracking-widest">Architecture</p>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  PatientPass AI is a full-stack web application built on a pnpm monorepo. The API layer is Express 5 with PostgreSQL and Drizzle ORM for persistence. The patient and provider dashboards are React + Vite single-page apps. The OpenAPI contract drives code generation for all client hooks and request/response schemas via Orval.
+                </p>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  The AI intake review engine calls GPT-4o mini for terminology normalization and GPT-4o for clinical summary generation, with graceful dictionary and template fallbacks when no API key is present. All access is logged to a tamper-evident audit trail. Temporary access codes are time-limited and revocable by the patient at any time. The integration API layer is designed to accept FHIR-formatted writes, enabling direct ingestion into Oracle Health and other standards-compliant EHR systems.
+                </p>
+              </div>
+            </FadeIn>
+
             {/* Architecture cards */}
             <FadeIn delay={150} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
               <ArchCard icon={User}      title="Patient portal" />
@@ -673,6 +697,110 @@ export default function Landing() {
                 </p>
               </div>
             </FadeIn>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════ IMPACT & NEXT STEPS */}
+        <section className="px-6 md:px-10 py-16 md:py-24 bg-white border-t border-slate-100">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn className="text-center mb-4">
+              <SectionLabel>Impact and what's next</SectionLabel>
+            </FadeIn>
+            <FadeIn delay={50} className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Real outcomes, clear roadmap.
+              </h2>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+
+              {/* Impact */}
+              <FadeIn delay={80}>
+                <div className="bg-blue-600 rounded-2xl p-7 text-white h-full flex flex-col gap-6">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-3">Impact today</p>
+                    <h3 className="text-xl font-bold leading-snug">What PatientPass changes right now.</h3>
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Less time at check-in</p>
+                        <p className="text-blue-100 text-sm leading-relaxed mt-0.5">Patients arrive with a complete, shareable record. Front desks skip the clipboard and go straight to care.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Fewer manual entry errors</p>
+                        <p className="text-blue-100 text-sm leading-relaxed mt-0.5">Patient-owned data means allergies and medications are accurate — not transcribed from memory under pressure in a waiting room.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Complete information before the visit</p>
+                        <p className="text-blue-100 text-sm leading-relaxed mt-0.5">AI flags missing fields and outdated records before the patient walks in, not after. Providers receive intake that is already ready.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">One profile reused across every provider</p>
+                        <p className="text-blue-100 text-sm leading-relaxed mt-0.5">Primary care, specialist, imaging center, urgent care — the patient updates once and the record is consistent everywhere.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+
+              {/* What's next */}
+              <FadeIn delay={160}>
+                <div className="border border-slate-100 rounded-2xl p-7 h-full flex flex-col gap-6 shadow-sm">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-3">What's next</p>
+                    <h3 className="text-xl font-bold text-slate-900 leading-snug">The roadmap from prototype to platform.</h3>
+                  </div>
+                  <div className="flex-1 space-y-5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <GitMerge className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-slate-900">FHIR-based EHR integration</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Write standardized intake directly into Oracle Health (Cerner), Epic, and other HL7 FHIR-compliant systems via the integration API layer. No manual re-entry, no duplicate records.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Stethoscope className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-slate-900">Provider pilots</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Structured pilots with clinic groups to measure time saved at intake, reduction in missing-field rates, and patient satisfaction. Results feed back into the product.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Globe className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-slate-900">Multi-language support</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">AI-powered translation of intake forms and summaries for patients whose first language is not English, starting with Spanish and Mandarin.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
           </div>
         </section>
 
