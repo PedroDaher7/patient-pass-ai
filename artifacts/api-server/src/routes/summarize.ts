@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { getOpenAI } from "../lib/openai-client.js";
 
 const router: IRouter = Router();
 
@@ -37,7 +38,58 @@ function listItems(arr: string[], max = 3): string {
   return shown.join(", ") + (extra > 0 ? `, and ${extra} more` : "");
 }
 
-function generateClinicalSummary(patient: PatientRaw): string {
+function buildAIPrompt(patient: PatientRaw): string {
+  const firstName = String(patient.firstName || "");
+  const lastName = String(patient.lastName || "");
+  const age = calcAge(String(patient.dateOfBirth || ""));
+  const sex = String(patient.biologicalSex || "").toLowerCase();
+  const bloodType = patient.bloodType ? String(patient.bloodType) : "";
+
+  const careTeam = (patient.careTeam ?? {}) as Record<string, string>;
+  const vitals = (patient.vitals ?? {}) as Record<string, string>;
+  const allConditions = (patient.conditions ?? []) as PatientRaw[];
+  const activeConditions = allConditions.filter(c => c.status === "Active");
+  const medications = (patient.medications ?? []) as PatientRaw[];
+  const allergies = (patient.allergies ?? []) as PatientRaw[];
+  const severeAllergies = allergies.filter(a => a.severity === "Severe");
+
+  const bmi = calcBMI(vitals.heightFt ?? "", vitals.heightIn ?? "", vitals.weightLbs ?? "");
+  const bp = vitals.systolic && vitals.diastolic ? `${vitals.systolic}/${vitals.diastolic} mmHg` : "";
+
+  const conditionLines = activeConditions
+    .map(c => `- ${String(c.name || "")}${c.diagnosedDate ? ` (dx ${String(c.diagnosedDate)})` : ""}`)
+    .join("\n");
+
+  const medLines = medications
+    .map(m => `- ${String(m.name || "")}${m.dose ? ` ${String(m.dose)}` : ""}${m.frequency ? ` ${String(m.frequency)}` : ""}`)
+    .join("\n");
+
+  const allergyLines = allergies
+    .map(a => `- ${String(a.name || "")} (${String(a.severity || "").toLowerCase()})`)
+    .join("\n");
+
+  const severeNames = severeAllergies.map(a => String(a.name || "")).filter(Boolean).join(", ");
+
+  return `Patient: ${firstName} ${lastName}, ${age}yo ${sex}${bloodType ? `, blood type ${bloodType}` : ""}
+DOB: ${fmtDate(String(patient.dateOfBirth || ""))}
+Presenting to: ${careTeam.visitSpecialty || "general practice"}
+Reason for visit: ${careTeam.reasonForVisit || "not specified"}
+Referring physician: ${careTeam.referringPhysician || "N/A"}
+
+Vitals: ${[vitals.weightLbs ? `${vitals.weightLbs} lbs` : "", bmi ? `BMI ${bmi}` : "", bp ? `BP ${bp}` : ""].filter(Boolean).join(", ") || "not recorded"}
+
+Active conditions:
+${conditionLines || "None on file"}
+
+Current medications:
+${medLines || "None on file"}
+
+Allergies:
+${allergyLines || "NKDA"}
+${severeNames ? `\nSEVERE ALLERGY ALERT: ${severeNames}` : ""}`;
+}
+
+function generateTemplateSummary(patient: PatientRaw): string {
   const firstName = String(patient.firstName || "");
   const lastName = String(patient.lastName || "");
   const fullName = `${firstName} ${lastName}`.trim() || "The patient";
@@ -48,7 +100,6 @@ function generateClinicalSummary(patient: PatientRaw): string {
 
   const careTeam = (patient.careTeam ?? {}) as Record<string, string>;
   const vitals = (patient.vitals ?? {}) as Record<string, string>;
-
   const allConditions = (patient.conditions ?? []) as PatientRaw[];
   const activeConditions = allConditions.filter(c => c.status === "Active");
   const medications = (patient.medications ?? []) as PatientRaw[];
@@ -62,16 +113,14 @@ function generateClinicalSummary(patient: PatientRaw): string {
   const bp = vitals.systolic && vitals.diastolic ? `${vitals.systolic}/${vitals.diastolic} mmHg` : "";
 
   const sentences: string[] = [];
-
-  // S1: Patient demographics + reason for visit
   const specialty = careTeam.visitSpecialty || "this practice";
   const reason = careTeam.reasonForVisit || "an unspecified reason";
+
   sentences.push(
     `${fullName} is a ${age}-year-old ${sex} (DOB ${dob}${bloodType}) ` +
     `presenting to ${specialty} today for ${reason}.`
   );
 
-  // S2: Active conditions and current medications
   const conditionNames = activeConditions.map(c => String(c.name || "")).filter(Boolean);
   const medNames = medications
     .map(m => [String(m.name || ""), String(m.dose || "")].filter(Boolean).join(" "))
@@ -79,24 +128,13 @@ function generateClinicalSummary(patient: PatientRaw): string {
 
   if (activeConditions.length > 0 || medications.length > 0) {
     const parts: string[] = [];
-    if (activeConditions.length > 0) {
-      parts.push(
-        `${activeConditions.length} active condition${activeConditions.length !== 1 ? "s" : ""} ` +
-        `(${listItems(conditionNames)})`
-      );
-    }
-    if (medications.length > 0) {
-      parts.push(
-        `${medications.length} current medication${medications.length !== 1 ? "s" : ""} ` +
-        `(${listItems(medNames)})`
-      );
-    }
+    if (activeConditions.length > 0) parts.push(`${activeConditions.length} active condition${activeConditions.length !== 1 ? "s" : ""} (${listItems(conditionNames)})`);
+    if (medications.length > 0) parts.push(`${medications.length} current medication${medications.length !== 1 ? "s" : ""} (${listItems(medNames)})`);
     sentences.push(`Medical history is notable for ${parts.join("; ")}.`);
   } else {
     sentences.push("No active conditions or current medications are on file.");
   }
 
-  // S3: Allergies — flag severe prominently
   if (allergies.length === 0) {
     sentences.push("No known drug allergies (NKDA) are reported.");
   } else if (severeAllergies.length > 0) {
@@ -110,12 +148,10 @@ function generateClinicalSummary(patient: PatientRaw): string {
   } else {
     const allergyList = allergies
       .map(a => `${a.name} (${String(a.severity || "").toLowerCase()})`)
-      .map(String)
-      .filter(Boolean);
+      .map(String).filter(Boolean);
     sentences.push(`Known allergies: ${listItems(allergyList, 4)}.`);
   }
 
-  // S4: Vitals snapshot + consent status
   const vParts: string[] = [];
   if (vitals.weightLbs) vParts.push(`weight ${vitals.weightLbs} lbs`);
   if (bmi) vParts.push(`BMI ${bmi}`);
@@ -126,18 +162,44 @@ function generateClinicalSummary(patient: PatientRaw): string {
     : "";
 
   sentences.push([vitalsStr, consentStr].filter(Boolean).join(" "));
-
   return sentences.join(" ");
 }
 
-router.post("/summarize", (req, res) => {
+router.post("/summarize", async (req, res) => {
   const patient = req.body?.patient as PatientRaw | undefined;
   if (!patient || typeof patient !== "object" || Array.isArray(patient)) {
     res.status(400).json({ error: "patient object is required in request body" });
     return;
   }
-  const summary = generateClinicalSummary(patient);
-  res.json({ summary });
+
+  const ai = getOpenAI();
+  if (ai) {
+    try {
+      const prompt = buildAIPrompt(patient);
+      const completion = await ai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a clinical intake specialist writing a pre-visit summary for a physician. Write 3-4 connected sentences in formal clinical prose — not bullet points. Pull together the presenting complaint, active conditions, current medications, and allergy status into a coherent narrative a provider can read in 15 seconds. Flag severe allergies prominently. Do not provide diagnosis, treatment recommendations, or clinical decisions. End with a one-sentence vitals snapshot if data is present.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 400,
+        temperature: 0.3,
+      });
+      const summary = completion.choices[0]?.message?.content?.trim();
+      if (summary) {
+        res.json({ summary, source: "ai" });
+        return;
+      }
+    } catch {
+      // fall through to template
+    }
+  }
+
+  res.json({ summary: generateTemplateSummary(patient), source: "template" });
 });
 
 export default router;

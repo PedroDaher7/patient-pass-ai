@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { PatientInput, ReviewOfSystems } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,123 +7,174 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, X, Upload, Sparkles } from "lucide-react";
+import { Plus, X, Upload, Sparkles, Loader2 } from "lucide-react";
 
-// ── AI normalize dictionaries ─────────────────────────────────────────────────
-const MED_NORMALIZE_MAP: Record<string, { formal: string; description: string }> = {
-  "water pill": { formal: "Hydrochlorothiazide (HCTZ)", description: "a diuretic" },
-  "water pills": { formal: "Hydrochlorothiazide (HCTZ)", description: "a diuretic" },
-  "blood thinner": { formal: "Warfarin (Coumadin)", description: "an anticoagulant" },
-  "blood thinners": { formal: "Warfarin (Coumadin)", description: "an anticoagulant" },
-  "blood pressure pill": { formal: "Lisinopril", description: "an ACE inhibitor for hypertension" },
-  "blood pressure medication": { formal: "Lisinopril", description: "an ACE inhibitor for hypertension" },
-  "sugar pill": { formal: "Metformin", description: "an oral antidiabetic for Type 2 diabetes" },
-  "diabetes pill": { formal: "Metformin", description: "an oral antidiabetic for Type 2 diabetes" },
-  "cholesterol pill": { formal: "Atorvastatin (Lipitor)", description: "a statin" },
-  "statin": { formal: "Atorvastatin (Lipitor)", description: "a statin for cholesterol" },
-  "sleeping pill": { formal: "Zolpidem (Ambien)", description: "a sleep aid" },
-  "sleep pill": { formal: "Zolpidem (Ambien)", description: "a sleep aid" },
-  "anxiety pill": { formal: "Lorazepam (Ativan)", description: "a benzodiazepine for anxiety" },
-  "acid pill": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor for acid reflux" },
-  "antacid": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor" },
-  "acid reflux pill": { formal: "Omeprazole (Prilosec)", description: "a proton pump inhibitor" },
-  "thyroid pill": { formal: "Levothyroxine (Synthroid)", description: "a thyroid hormone" },
-  "bone pill": { formal: "Alendronate (Fosamax)", description: "a bisphosphonate for osteoporosis" },
-  "steroid": { formal: "Prednisone", description: "a corticosteroid" },
-  "inhaler": { formal: "Albuterol", description: "a bronchodilator" },
-  "pain pill": { formal: "Ibuprofen or Acetaminophen", description: "specify if prescription or OTC" },
-};
+type NormalizeResult = { formal: string; description: string; source: "ai" | "dictionary" | "unrecognized" };
 
-const COND_NORMALIZE_MAP: Record<string, { formal: string; description: string }> = {
-  "high blood pressure": { formal: "Hypertension", description: "elevated blood pressure" },
-  "high bp": { formal: "Hypertension", description: "elevated blood pressure" },
-  "sugar diabetes": { formal: "Type 2 Diabetes Mellitus", description: "a metabolic disorder" },
-  "high cholesterol": { formal: "Hyperlipidemia", description: "elevated blood lipids" },
-  "overweight": { formal: "Obesity", description: "specify BMI class with your doctor" },
-  "low thyroid": { formal: "Hypothyroidism", description: "underactive thyroid" },
-  "underactive thyroid": { formal: "Hypothyroidism", description: "underactive thyroid" },
-  "acid reflux": { formal: "Gastroesophageal Reflux Disease (GERD)", description: "a stomach acid disorder" },
-  "heartburn": { formal: "Gastroesophageal Reflux Disease (GERD)", description: "a stomach acid disorder" },
-  "irregular heartbeat": { formal: "Atrial Fibrillation (AFib)", description: "an irregular heart rhythm" },
-  "heart flutter": { formal: "Atrial Fibrillation (AFib)", description: "an irregular heart rhythm" },
-  "weak heart": { formal: "Congestive Heart Failure (CHF)", description: "reduced heart pumping capacity" },
-  "depression": { formal: "Major Depressive Disorder (MDD)", description: "a mood disorder" },
-  "anxiety": { formal: "Generalized Anxiety Disorder (GAD)", description: "an anxiety disorder" },
-  "copd": { formal: "Chronic Obstructive Pulmonary Disease (COPD)", description: "a chronic lung condition" },
-  "arthritis": { formal: "Osteoarthritis", description: "specify joint and type with your doctor" },
-};
-
-function findNormalize(
-  text: string,
-  map: Record<string, { formal: string; description: string }>
-): { formal: string; description: string } | null {
-  const lower = text.trim().toLowerCase();
-  if (!lower) return null;
-  return map[lower] ?? null;
+async function callAINormalize(text: string, type: "medication" | "condition"): Promise<NormalizeResult> {
+  const res = await fetch("/api/ai-normalize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, type }),
+  });
+  if (!res.ok) throw new Error("normalize failed");
+  return res.json() as Promise<NormalizeResult>;
 }
 
 function NormalizeSuggestion({
-  suggestion,
+  original,
+  result,
   onApply,
+  onDismiss,
 }: {
-  suggestion: { formal: string; description: string };
+  original: string;
+  result: NormalizeResult;
   onApply: () => void;
+  onDismiss: () => void;
 }) {
+  const isAI = result.source === "ai";
+  const label = isAI ? "AI normalized" : "AI suggests";
   return (
-    <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
-      <Sparkles className="w-3 h-3 text-blue-500 flex-shrink-0" />
-      <span className="text-xs text-slate-600 flex-1 min-w-0">
-        AI suggests: <strong className="text-slate-800">{suggestion.formal}</strong>
-        <span className="text-slate-400 ml-1">({suggestion.description})</span>
-      </span>
-      <button
-        type="button"
-        onClick={onApply}
-        className="text-xs font-semibold text-blue-700 hover:text-blue-900 transition-colors flex-shrink-0 whitespace-nowrap"
-      >
-        Use this ↵
-      </button>
+    <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5 space-y-2">
+      <div className="flex items-start gap-2">
+        <Sparkles className="w-3 h-3 text-blue-500 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0 text-xs">
+          <span className="text-blue-600 font-semibold">{label}:</span>
+          <div className="mt-1 flex items-center gap-2 flex-wrap">
+            <span className="text-slate-400 line-through">{original}</span>
+            <span className="text-slate-400">→</span>
+            <span className="font-semibold text-slate-800">{result.formal}</span>
+          </div>
+          {result.description && (
+            <span className="text-slate-500 text-[11px]">{result.description}</span>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-2 justify-end">
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          Keep original
+        </button>
+        <button
+          type="button"
+          onClick={onApply}
+          className="text-xs font-semibold text-blue-700 hover:text-blue-900 transition-colors"
+        >
+          Use this ↵
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AIInputWrapper({
+  value,
+  onChange,
+  type,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  type: "medication" | "condition";
+  placeholder: string;
+}) {
+  const [loading,    setLoading]    = useState(false);
+  const [result,     setResult]     = useState<NormalizeResult | null>(null);
+  const [original,   setOriginal]   = useState("");
+  const [error,      setError]      = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+    setResult(null);
+    setError(null);
+  };
+
+  const handleNormalize = useCallback(async () => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    setLoading(true);
+    setResult(null);
+    setError(null);
+    setOriginal(trimmed);
+    try {
+      const res = await callAINormalize(trimmed, type);
+      setResult(res);
+    } catch {
+      setError("AI unavailable — please type the formal name manually.");
+    } finally {
+      setLoading(false);
+    }
+  }, [value, type]);
+
+  const handleApply = () => {
+    if (result) { onChange(result.formal); setResult(null); }
+  };
+
+  const handleDismiss = () => setResult(null);
+
+  const showNormalizeBtn = value.trim().length >= 3 && !loading && !result;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex gap-1.5">
+        <Input
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          className="flex-1"
+        />
+        {showNormalizeBtn && (
+          <button
+            type="button"
+            onClick={handleNormalize}
+            title="AI normalize"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-md hover:bg-blue-100 transition-colors whitespace-nowrap"
+          >
+            <Sparkles className="w-3 h-3" />
+            AI
+          </button>
+        )}
+        {loading && (
+          <div className="flex items-center px-2.5">
+            <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />
+          </div>
+        )}
+      </div>
+      {error && <p className="text-[11px] text-rose-500">{error}</p>}
+      {result && (
+        <NormalizeSuggestion
+          original={original}
+          result={result}
+          onApply={handleApply}
+          onDismiss={handleDismiss}
+        />
+      )}
     </div>
   );
 }
 
 function MedNameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  const [suggestion, setSuggestion] = useState<{ formal: string; description: string } | null>(null);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    onChange(val);
-    setSuggestion(findNormalize(val, MED_NORMALIZE_MAP));
-  };
   return (
-    <div className="space-y-1.5">
-      <Input value={value} onChange={handleChange} placeholder="e.g. Metformin, Lisinopril" />
-      {suggestion && (
-        <NormalizeSuggestion
-          suggestion={suggestion}
-          onApply={() => { onChange(suggestion.formal); setSuggestion(null); }}
-        />
-      )}
-    </div>
+    <AIInputWrapper
+      value={value}
+      onChange={onChange}
+      type="medication"
+      placeholder="e.g. water pill, Metformin, Lisinopril"
+    />
   );
 }
 
 function CondNameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  const [suggestion, setSuggestion] = useState<{ formal: string; description: string } | null>(null);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    onChange(val);
-    setSuggestion(findNormalize(val, COND_NORMALIZE_MAP));
-  };
   return (
-    <div className="space-y-1.5">
-      <Input value={value} onChange={handleChange} placeholder="e.g. Type 2 Diabetes, Hypertension" />
-      {suggestion && (
-        <NormalizeSuggestion
-          suggestion={suggestion}
-          onApply={() => { onChange(suggestion.formal); setSuggestion(null); }}
-        />
-      )}
-    </div>
+    <AIInputWrapper
+      value={value}
+      onChange={onChange}
+      type="condition"
+      placeholder="e.g. sugar, the heart thing, Hypertension"
+    />
   );
 }
 

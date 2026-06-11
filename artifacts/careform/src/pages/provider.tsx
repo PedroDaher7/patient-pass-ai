@@ -932,14 +932,17 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
 // ─── Provider Page ─────────────────────────────────────────────────────────────
 export default function Provider() {
   const [demoPatient, setDemoPatient] = useState<Patient | null>(null);
+  const [demoReady,   setDemoReady]   = useState(false);
   const [activeCode,  setActiveCode]  = useState(() => new URLSearchParams(window.location.search).get("code") ?? "");
   const [lookupInput, setLookupInput] = useState("");
 
   useEffect(() => {
+    const timer = setTimeout(() => setDemoReady(true), 4000);
     fetch("/api/patient/demo")
       .then(r => { if (!r.ok) throw new Error(); return r.json() as Promise<Patient>; })
-      .then(setDemoPatient)
-      .catch(() => {});
+      .then(p => { clearTimeout(timer); setDemoPatient(p); setDemoReady(true); })
+      .catch(() => { clearTimeout(timer); setDemoReady(true); });
+    return () => clearTimeout(timer);
   }, []);
 
   const { data: codeData, isLoading: codeLoading, isError: codeIsError, error: codeError } = useValidateCode(
@@ -979,9 +982,34 @@ export default function Provider() {
   };
 
   if (!activeData) {
+    if (!demoReady) {
+      return (
+        <div className="h-dvh bg-slate-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      );
+    }
     return (
-      <div className="h-dvh bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="h-dvh bg-slate-50 flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <span className="font-bold text-lg tracking-tight text-primary">PatientPass AI</span>
+        <p className="text-slate-600 text-sm max-w-xs">
+          Demo data is temporarily unavailable. Enter a 6-digit patient code to view a record.
+        </p>
+        <form
+          onSubmit={(e) => { e.preventDefault(); const code = lookupInput.replace(/\D/g, "").slice(0, 6); if (code.length === 6) setActiveCode(code); }}
+          className="flex gap-2"
+        >
+          <input
+            value={lookupInput}
+            onChange={e => setLookupInput(e.target.value)}
+            placeholder="000000"
+            maxLength={6}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-center font-mono text-lg w-32 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <button type="submit" className="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
+            Look up
+          </button>
+        </form>
       </div>
     );
   }
