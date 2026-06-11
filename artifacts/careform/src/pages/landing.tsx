@@ -2,10 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
-  User, Stethoscope, QrCode, Brain, ArrowRight, Check,
+  User, Stethoscope, QrCode, Brain, ArrowRight, ArrowDown, Check,
   ClipboardList, Lock, Sparkles, History, FileCheck,
   AlertCircle, Bell, BarChart3, RefreshCw, Clock, Heart,
-  Shield, Server, Network, Cpu, Globe, GitMerge,
+  Shield, Globe, GitMerge,
 } from "lucide-react";
 
 // ─── Animation helper ─────────────────────────────────────────────────────────
@@ -180,13 +180,56 @@ function ProblemCard({ icon: Icon, title, body, color }: { icon: React.ElementTy
   );
 }
 
-function ArchCard({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
+function ArchDiagram() {
+  const nodes = [
+    { label: "Patient App",              sub: "React · Vite" },
+    { label: "Intake & Consent Layer",   sub: "Express · PostgreSQL" },
+    { label: "AI Review Engine",         sub: "GPT-4o · GPT-4o mini" },
+    { label: "Integration & FHIR Layer", sub: "HL7 FHIR · OpenAPI" },
+    { label: "Provider Access",          sub: "QR · 6-digit code" },
+  ];
   return (
-    <div className="border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-3 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-colors">
-      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-        <Icon className="w-4 h-4 text-blue-400" strokeWidth={1.5} />
+    <div className="border border-white/10 rounded-2xl bg-white/[0.03] p-6 md:p-8">
+      {/* Desktop: horizontal flow */}
+      <div className="hidden md:flex items-stretch gap-2">
+        {nodes.map((n, i) => (
+          <div key={n.label} className="contents">
+            <div className="flex-1 flex flex-col items-center justify-center text-center bg-blue-500/10 border border-blue-500/20 rounded-xl px-3 py-5">
+              <p className="text-white text-sm font-semibold leading-snug">{n.label}</p>
+              <p className="text-blue-300/70 text-[11px] mt-1.5 leading-snug">{n.sub}</p>
+            </div>
+            {i < nodes.length - 1 && (
+              <div className="flex items-center flex-shrink-0 px-0.5">
+                <ArrowRight className="w-4 h-4 text-blue-500/50" />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-      <span className="text-sm font-medium text-white/80">{title}</span>
+      {/* Mobile: vertical stack */}
+      <div className="flex md:hidden flex-col gap-2">
+        {nodes.map((n, i) => (
+          <div key={n.label} className="contents">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3">
+              <p className="text-white text-sm font-semibold">{n.label}</p>
+              <p className="text-blue-300/70 text-[11px] mt-0.5">{n.sub}</p>
+            </div>
+            {i < nodes.length - 1 && (
+              <div className="flex justify-center">
+                <ArrowDown className="w-4 h-4 text-blue-500/50" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      {/* OCI foundation bar */}
+      <div className="mt-6 flex items-center gap-4">
+        <div className="flex-1 h-px bg-white/10" />
+        <span className="text-[11px] font-bold text-white/40 uppercase tracking-[0.15em] whitespace-nowrap">
+          Oracle Cloud Infrastructure
+        </span>
+        <div className="flex-1 h-px bg-white/10" />
+      </div>
     </div>
   );
 }
@@ -661,31 +704,16 @@ export default function Landing() {
               </p>
             </FadeIn>
 
-            {/* Architecture: readable prose for automated readers */}
-            <FadeIn delay={130} className="mb-10">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-                <p className="text-sm font-semibold text-blue-300 uppercase tracking-widest">Architecture</p>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  PatientPass AI is a full-stack web application built on a pnpm monorepo. The API layer is Express 5 with PostgreSQL and Drizzle ORM for persistence. The patient and provider dashboards are React + Vite single-page apps. The OpenAPI contract drives code generation for all client hooks and request/response schemas via Orval.
-                </p>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  The AI intake review engine calls GPT-4o mini for terminology normalization and GPT-4o for clinical summary generation, with graceful dictionary and template fallbacks when no API key is present. All access is logged to a tamper-evident audit trail. Temporary access codes are time-limited and revocable by the patient at any time. The integration API layer is designed to accept FHIR-formatted writes, enabling direct ingestion into Oracle Health and other standards-compliant EHR systems.
-                </p>
-              </div>
+            {/* Scalability statement */}
+            <FadeIn delay={130} className="mb-8">
+              <p className="text-slate-300 text-base leading-relaxed max-w-2xl">
+                Built on Oracle Cloud Infrastructure. FHIR-ready to write standardized intake directly into Oracle Health and any compliant EHR. Designed to scale to millions of patient passes — each cryptographically scoped, patient-controlled, and time-limited.
+              </p>
             </FadeIn>
 
-            {/* Architecture cards */}
-            <FadeIn delay={150} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
-              <ArchCard icon={User}      title="Patient portal" />
-              <ArchCard icon={Globe}     title="Provider access gateway" />
-              <ArchCard icon={FileCheck} title="Consent management" />
-              <ArchCard icon={Shield}    title="Audit and compliance layer" />
-              <ArchCard icon={Cpu}       title="AI intake review engine" />
-              <ArchCard icon={Network}   title="Integration API layer" />
-            </FadeIn>
-
-            <FadeIn delay={200} className="col-span-full">
-              <ArchCard icon={Server} title="OCI security foundation" />
+            {/* Architecture diagram */}
+            <FadeIn delay={160} className="mb-8">
+              <ArchDiagram />
             </FadeIn>
 
             {/* Callout */}
