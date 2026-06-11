@@ -6,3 +6,9 @@ id = "dMDNhqLbSd0Me-yHSsLiK"
 uri = "file://patientpass-ai-source.tar.gz"
 type = "unspecified"
 title = "PatientPass AI — Source Code"
+
+[[outputs]]
+id = "TEp1HYWyzFUnE8CL2yoZe"
+uri = "file://patientpass-source.tar.gz"
+type = "unspecified"
+title = "PatientPass AI — Source Code"
