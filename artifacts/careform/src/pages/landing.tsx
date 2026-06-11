@@ -396,6 +396,23 @@ export default function Landing() {
                 </div>
               ))}
             </div>
+
+            {/* Who needs this */}
+            <div className="mt-8 border-t border-slate-100/80 pt-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 text-center">Who needs this</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+                {([
+                  { n: "133M", label: "Americans with chronic conditions seeing 3+ providers per year" },
+                  { n: "53M",  label: "Family caregivers managing medical records for a loved one" },
+                  { n: "30M+", label: "Uninsured or underinsured patients navigating multiple clinics" },
+                ] as const).map(u => (
+                  <div key={u.n} className="text-center bg-white border border-slate-100 rounded-xl px-4 py-4 shadow-sm">
+                    <p className="text-2xl font-extrabold text-blue-600 tracking-tight">{u.n}</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-snug">{u.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -935,6 +952,34 @@ export default function Landing() {
               <ArchDiagram />
             </FadeIn>
 
+            {/* Stack */}
+            <FadeIn delay={190} className="mb-6">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Technology stack</p>
+              <div className="flex flex-wrap gap-2">
+                {["Express 5", "PostgreSQL", "Drizzle ORM", "Orval codegen", "GPT-4o", "React + Vite", "FHIR R4", "Oracle Cloud Infrastructure"].map(t => (
+                  <span key={t} className="text-xs font-semibold bg-white/10 text-slate-300 border border-white/10 px-3 py-1.5 rounded-full">{t}</span>
+                ))}
+              </div>
+            </FadeIn>
+
+            {/* Performance metrics */}
+            <FadeIn delay={220} className="mb-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Performance</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {([
+                  { n: "<200ms", label: "API response" },
+                  { n: "<3s",    label: "AI summary generation" },
+                  { n: "0",      label: "Provider installs required" },
+                  { n: "100%",   label: "Patient-controlled access" },
+                ] as const).map(m => (
+                  <div key={m.n} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                    <p className="text-xl font-extrabold text-blue-400 tracking-tight">{m.n}</p>
+                    <p className="text-xs text-slate-400 mt-1 leading-snug">{m.label}</p>
+                  </div>
+                ))}
+              </div>
+            </FadeIn>
+
             {/* Callout */}
             <FadeIn delay={250} className="mt-8">
               <div className="inline-block border border-blue-500/30 rounded-2xl bg-blue-500/10 px-6 py-4">
@@ -1006,6 +1051,10 @@ export default function Landing() {
                       </div>
                     </div>
                   </div>
+                  <div className="border-t border-blue-500/30 pt-4">
+                    <p className="text-[11px] font-bold text-blue-300 uppercase tracking-widest mb-1.5">Technical impact at scale</p>
+                    <p className="text-blue-100 text-sm leading-relaxed">Every FHIR write replaces one manual transcription event. At 1% US market penetration that is <span className="font-bold text-white">12.5 million avoided data-entry errors per year.</span></p>
+                  </div>
                 </div>
               </FadeIn>
 
@@ -1054,6 +1103,10 @@ export default function Landing() {
                         <p className="text-slate-500 text-sm leading-relaxed mt-0.5">AI-powered translation of intake forms and clinician summaries for patients whose first language is not English, starting with Spanish and Mandarin.</p>
                       </div>
                     </div>
+                  </div>
+                  <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3">
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1.5">Primary hypothesis to validate</p>
+                    <p className="text-sm text-blue-800 leading-relaxed">A 30-day pilot with a 5-provider group will prove that patient intake time drops below 60 seconds and missing-field rates fall below 5% — measurable from day one.</p>
                   </div>
                 </div>
               </FadeIn>
