@@ -1237,6 +1237,10 @@ export default function Home() {
     <div className="min-h-[100dvh] bg-slate-50 flex flex-col">
       <PatientHeader saveStatus={saveStatus} onReset={handleReset} />
 
+      <div className="bg-blue-600 text-white text-sm font-semibold text-center py-2.5 px-6 flex-shrink-0">
+        PatientPass: one patient-maintained intake, shared securely with any provider.
+      </div>
+
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 pb-16">
 
         {/* Hero */}

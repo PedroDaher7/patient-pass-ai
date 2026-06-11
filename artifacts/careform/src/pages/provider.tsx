@@ -819,6 +819,9 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
 
         {/* ── Main ── */}
         <main className="flex-1 overflow-y-auto">
+          <div className="bg-blue-50 border-b border-blue-100 px-5 py-2.5 text-center text-sm text-blue-700 font-medium flex-shrink-0">
+            PatientPass: one patient-maintained intake, shared securely with any provider.
+          </div>
           {allergies.length > 0 && <AllergyBanner allergies={allergies} />}
           {newUpdates.length > 0 && <UpdatesBanner updates={newUpdates} />}
 

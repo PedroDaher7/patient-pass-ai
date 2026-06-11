@@ -307,21 +307,30 @@ export default function Landing() {
               <span className="text-primary">always current and ready to share.</span>
             </h1>
 
-            <p className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 text-lg md:text-xl text-slate-500 leading-relaxed mb-8 max-w-2xl mx-auto">
-              PatientPass AI gives you one secure health intake profile you maintain once and share with any doctor, clinic, or hospital in seconds — by QR code or a temporary access code.
+            {/* Value statement */}
+            <p className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 text-xl md:text-2xl font-semibold text-slate-700 leading-snug mb-6 max-w-2xl mx-auto">
+              Fill out your medical intake once. Share it with any provider in seconds. Always current, always yours.
             </p>
 
-            {/* Hero visual */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-200">
-              <HeroFlow />
+            {/* Three benefits — above the fold */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-200 flex flex-wrap items-center justify-center gap-3 mb-8">
+              <div className="flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-sm">
+                <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                Save time at check-in
+              </div>
+              <div className="flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-sm">
+                <Check className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={3} />
+                Fewer errors
+              </div>
+              <div className="flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-sm">
+                <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+                You control access
+              </div>
             </div>
 
-            {/* Trust badges */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-300 flex flex-wrap items-center justify-center gap-2.5 mb-10">
-              <TrustBadge>Patient controlled</TrustBadge>
-              <TrustBadge>Secure sharing</TrustBadge>
-              <TrustBadge>AI assisted</TrustBadge>
-              <TrustBadge>Integration ready</TrustBadge>
+            {/* Hero visual */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-300">
+              <HeroFlow />
             </div>
 
             {/* CTA buttons */}
