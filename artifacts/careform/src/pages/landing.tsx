@@ -358,9 +358,44 @@ export default function Landing() {
                 </Button>
               </Link>
             </div>
-            <p className="animate-in fade-in duration-700 fill-mode-both delay-500 text-sm text-slate-400 mt-4">
-              No sign-up or login required.
-            </p>
+            {/* Try the demo guide */}
+            <div className="animate-in fade-in duration-700 fill-mode-both delay-500 mt-6 max-w-2xl mx-auto bg-slate-50 rounded-2xl border border-slate-200 p-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 text-center">Try the live demo in 60 seconds</p>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <Link href="/patient" className="flex flex-col items-center gap-1.5 bg-blue-600 text-white rounded-xl px-3 py-4 hover:bg-blue-700 transition-colors cursor-pointer">
+                  <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                  <p className="text-xs font-semibold leading-tight">Open Patient view</p>
+                  <p className="text-[11px] opacity-75 leading-tight">See Maria Lopez's intake</p>
+                </Link>
+                <div className="flex flex-col items-center gap-1.5 bg-white border border-blue-100 text-blue-700 rounded-xl px-3 py-4">
+                  <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-sm font-bold flex-shrink-0 text-blue-600">2</span>
+                  <p className="text-xs font-semibold leading-tight">Copy the access code</p>
+                  <p className="text-[11px] opacity-75 leading-tight">Tap "Share Pass" → get a 6-digit code</p>
+                </div>
+                <Link href="/provider" className="flex flex-col items-center gap-1.5 bg-slate-100 text-slate-700 rounded-xl px-3 py-4 hover:bg-slate-200 transition-colors cursor-pointer">
+                  <span className="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center text-sm font-bold flex-shrink-0 text-slate-600">3</span>
+                  <p className="text-xs font-semibold leading-tight">Open Provider view</p>
+                  <p className="text-[11px] opacity-75 leading-tight">Enter code → see AI summary</p>
+                </Link>
+              </div>
+              <p className="text-xs text-slate-400 mt-3 text-center">No sign-up or login required · Demo uses synthetic data only</p>
+            </div>
+
+            {/* Stats band */}
+            <div className="animate-in fade-in duration-700 fill-mode-both delay-600 mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto border-t border-slate-100 pt-10">
+              {([
+                { n: "1.25B", label: "US outpatient visits per year requiring an intake form", src: "CDC" },
+                { n: "$8.3B", label: "Annual cost of duplicate health data entry in US healthcare", src: "CAQH" },
+                { n: "61%", label: "of patients seeing 3+ providers re-enter the same history every visit", src: "AMA" },
+                { n: "#1", label: "Preventable cause of hospital harm is medication errors from bad intake data", src: "WHO" },
+              ] as const).map(s => (
+                <div key={s.n} className="text-center">
+                  <p className="text-2xl md:text-3xl font-extrabold text-blue-600 tracking-tight">{s.n}</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-snug">{s.label}</p>
+                  <p className="text-[10px] text-slate-300 mt-0.5 font-medium">{s.src}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -377,7 +412,7 @@ export default function Landing() {
             </FadeIn>
             <FadeIn delay={100} className="text-center mb-14">
               <p className="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto">
-                Every new doctor, specialist, urgent care, imaging center, or hospital asks for the same things again. Medications, allergies, surgeries, insurance, emergency contacts, history. When you cannot remember it all, mistakes slip in — and for older patients, caregivers, and anyone managing several conditions, it is stressful and easy to get wrong.
+                Every new doctor, specialist, urgent care, imaging center, or hospital asks for the same things again. Medications, allergies, surgeries, insurance, emergency contacts, history. This happens across <strong className="text-slate-700">1.25 billion US outpatient visits every year</strong>, costing the system an estimated <strong className="text-slate-700">$8.3 billion in duplicate administrative work</strong> (CAQH Index). When you cannot remember it all, mistakes slip in — and for older patients, caregivers, and anyone managing several conditions, it is stressful and dangerously easy to get wrong.
               </p>
             </FadeIn>
 
@@ -413,6 +448,74 @@ export default function Landing() {
                   body="Families struggle to keep medical details organized for aging parents or loved ones managing multiple conditions."
                   color="bg-violet-50 border-violet-100 text-violet-900"
                 />
+              </FadeIn>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════ BEFORE / AFTER */}
+        <section className="px-6 md:px-10 py-16 md:py-20 bg-gradient-to-b from-slate-50 to-white border-t border-slate-100">
+          <div className="max-w-4xl mx-auto">
+            <FadeIn className="text-center mb-4">
+              <SectionLabel>The workflow change</SectionLabel>
+            </FadeIn>
+            <FadeIn delay={50} className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Before and after PatientPass.
+              </h2>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Before */}
+              <FadeIn delay={80}>
+                <div className="rounded-2xl border-2 border-rose-100 bg-rose-50/40 p-6 h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                      <X className="w-3.5 h-3.5 text-rose-500" strokeWidth={3} />
+                    </div>
+                    <p className="text-sm font-bold text-rose-700 uppercase tracking-wide">Before PatientPass</p>
+                  </div>
+                  <div className="space-y-3">
+                    {([
+                      { tag: "−30 min",  text: "Arrive early to fill out the paper clipboard form — again, at this clinic, today." },
+                      { tag: "5×/year",  text: "Re-enter medications, allergies, and history at every new provider." },
+                      { tag: "Common",   text: "Forget a medication name or dose; staff manually transcribe your handwriting." },
+                      { tag: "Siloed",   text: "Each clinic stores your data separately — none of it connected or portable." },
+                      { tag: "Risk",     text: "Providers make decisions with incomplete intake. Errors enter the record here." },
+                    ] as const).map(item => (
+                      <div key={item.tag} className="flex items-start gap-3">
+                        <span className="text-[10px] font-bold text-rose-500 bg-rose-100 px-2 py-0.5 rounded mt-0.5 flex-shrink-0 min-w-[52px] text-center">{item.tag}</span>
+                        <p className="text-sm text-rose-900 leading-relaxed">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </FadeIn>
+
+              {/* After */}
+              <FadeIn delay={160}>
+                <div className="rounded-2xl border-2 border-blue-100 bg-blue-50/40 p-6 h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3.5 h-3.5 text-blue-600" strokeWidth={3} />
+                    </div>
+                    <p className="text-sm font-bold text-blue-700 uppercase tracking-wide">With PatientPass</p>
+                  </div>
+                  <div className="space-y-3">
+                    {([
+                      { tag: "30 sec",  text: "Open your PatientPass, tap Share, hand the front desk a code or QR scan." },
+                      { tag: "Once",    text: "Maintain your intake one time. Reuse it at every provider, forever." },
+                      { tag: "AI",      text: "PatientPass flags missing or outdated fields before you arrive." },
+                      { tag: "Travels", text: "Your record goes with you — any provider, any EHR, any clinic, any city." },
+                      { tag: "Safe",    text: "Provider receives a complete, AI-reviewed intake before the appointment starts." },
+                    ] as const).map(item => (
+                      <div key={item.tag} className="flex items-start gap-3">
+                        <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded mt-0.5 flex-shrink-0 min-w-[52px] text-center">{item.tag}</span>
+                        <p className="text-sm text-blue-900 leading-relaxed">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </FadeIn>
             </div>
           </div>
@@ -955,6 +1058,31 @@ export default function Landing() {
                 </div>
               </FadeIn>
             </div>
+
+            {/* Defensibility */}
+            <FadeIn delay={280}>
+              <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-5">What makes PatientPass hard to copy</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {([
+                    { icon: BarChart3, title: "Patient data flywheel",    body: "Each record update builds a richer longitudinal history. A new entrant cannot replicate years of patient-maintained accuracy." },
+                    { icon: Shield,    title: "FHIR trust relationships", body: "Write access to Oracle Health and Epic requires vetted clinical integration partnerships built over time — not just an API key." },
+                    { icon: GitMerge,  title: "Network lock-in",          body: "As more providers recognise the PatientPass format, adoption compounds and patient switching costs rise." },
+                    { icon: Lock,      title: "Patient ownership moat",   body: "Unlike EHR-owned portals, the record belongs to the patient — not the health system. This is a structural trust advantage." },
+                  ] as const).map(({ icon: Icon, title, body }) => (
+                    <div key={title} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Icon className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{title}</p>
+                        <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
           </div>
         </section>
 
