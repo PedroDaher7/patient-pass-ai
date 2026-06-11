@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "wouter";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -686,13 +687,17 @@ function ProviderDashboard({ data, lookup }: { data: { patient: Patient; expires
     <div className="h-dvh bg-slate-50 flex flex-col font-sans text-slate-900 overflow-hidden">
       {/* ── Top bar ── */}
       <header className="bg-white border-b border-slate-200 px-5 h-14 flex items-center gap-3 flex-shrink-0 shadow-sm z-20">
-        <span className="font-bold text-base tracking-tight text-primary flex-shrink-0">PatientPass AI</span>
+        <Link href="/" className="font-bold text-base tracking-tight text-primary flex-shrink-0 hover:opacity-80 transition-opacity">PatientPass AI</Link>
         <span className="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full flex-shrink-0">Provider View</span>
         <span className="hidden md:block text-slate-300 text-sm">|</span>
         <span className="hidden md:block font-semibold text-slate-800 truncate">{p.firstName} {p.lastName}</span>
         {lookup.isDemo && (
           <span className="hidden md:inline-flex items-center text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full flex-shrink-0">Demo</span>
         )}
+        <div className="hidden sm:flex items-center gap-1 ml-1">
+          <Link href="/patient" className="text-xs text-slate-400 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-slate-50">Patient</Link>
+          <Link href="/" className="text-xs font-medium text-slate-400 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-slate-50">Home</Link>
+        </div>
         <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
           <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 hidden sm:flex" onClick={handleCopyEHR}>
             {copied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}

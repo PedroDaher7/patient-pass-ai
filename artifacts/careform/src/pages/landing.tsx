@@ -273,18 +273,25 @@ export default function Landing() {
 
       {/* ════════════════════════════════════════════ NAV */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/80 px-6 md:px-10 py-4 flex items-center justify-between">
-        <span className="font-bold text-lg tracking-tight text-primary">PatientPass AI</span>
+        <Link href="/" className="font-bold text-lg tracking-tight text-primary hover:opacity-80 transition-opacity">PatientPass AI</Link>
         <nav className="hidden md:flex items-center gap-6 text-sm text-slate-500">
           <a href="#solution" className="hover:text-slate-900 transition-colors">Product</a>
           <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How it works</a>
           <a href="#families" className="hover:text-slate-900 transition-colors">Families</a>
           <a href="#future" className="hover:text-slate-900 transition-colors">Enterprise</a>
         </nav>
-        <Link href="/provider">
-          <Button variant="outline" size="sm" className="text-xs h-9 border-slate-200 hover:border-primary hover:text-primary transition-colors">
-            Provider access
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/patient">
+            <Button variant="ghost" size="sm" className="text-xs h-9 text-slate-500 hover:text-primary transition-colors">
+              Patient
+            </Button>
+          </Link>
+          <Link href="/provider">
+            <Button variant="outline" size="sm" className="text-xs h-9 border-slate-200 hover:border-primary hover:text-primary transition-colors">
+              Provider access
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col">

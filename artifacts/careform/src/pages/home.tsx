@@ -1641,7 +1641,7 @@ function PatientHeader({ saveStatus, onReset }: { saveStatus: "idle" | "saving" 
         </Link>
         <span className="hidden sm:block text-xs font-medium bg-blue-50 text-blue-600 px-2 py-1 rounded-full">Your Intake</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={onReset} className="text-xs text-slate-400 gap-1.5 hidden sm:flex hover:text-slate-600">
           <RotateCcw className="w-3 h-3" />Reset Demo
         </Button>
@@ -1649,7 +1649,8 @@ function PatientHeader({ saveStatus, onReset }: { saveStatus: "idle" | "saving" 
           {saveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" />Saving</>}
           {saveStatus === "saved" && <><CheckCircle2 className="w-3 h-3 text-green-500" />Saved</>}
         </div>
-        <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">← Home</Link>
+        <Link href="/provider" className="text-sm text-slate-500 hover:text-primary transition-colors px-2 py-1">Provider</Link>
+        <Link href="/" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors px-2 py-1">Home</Link>
       </div>
     </header>
   );
