@@ -2,10 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
-  User, Stethoscope, QrCode, Brain, ArrowRight, ArrowDown, Check,
+  User, Stethoscope, QrCode, Brain, ArrowRight, ArrowDown, Check, X,
   ClipboardList, Lock, Sparkles, History, FileCheck,
   AlertCircle, Bell, BarChart3, RefreshCw, Clock, Heart,
-  Shield, Globe, GitMerge,
+  Shield, Globe, GitMerge, Smartphone, FileText,
 } from "lucide-react";
 
 // ─── Animation helper ─────────────────────────────────────────────────────────
@@ -408,6 +408,106 @@ export default function Landing() {
                 />
               </FadeIn>
             </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════ WHY PATIENTPASS */}
+        <section className="px-6 md:px-10 py-16 md:py-20 bg-slate-50 border-t border-slate-100">
+          <div className="max-w-4xl mx-auto">
+            <FadeIn className="text-center mb-4">
+              <SectionLabel>Why PatientPass</SectionLabel>
+            </FadeIn>
+            <FadeIn delay={50} className="text-center mb-3">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Better than what exists today.
+              </h2>
+            </FadeIn>
+            <FadeIn delay={100} className="text-center mb-12">
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                Patients already have tools. None of them solve the intake problem.
+              </p>
+            </FadeIn>
+
+            {/* Comparison table */}
+            <FadeIn delay={150}>
+              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+
+                {/* Column headers */}
+                <div className="grid grid-cols-[1fr_1fr_1fr] text-xs font-bold uppercase tracking-widest border-b border-slate-100">
+                  <div className="px-5 py-3 text-slate-400">Alternative</div>
+                  <div className="px-5 py-3 text-slate-400 border-l border-slate-100">What's missing</div>
+                  <div className="px-5 py-3 text-blue-600 border-l border-blue-100 bg-blue-50/50">PatientPass advantage</div>
+                </div>
+
+                {/* Row 1: Paper / PDF */}
+                <div className="grid grid-cols-[1fr_1fr_1fr] border-b border-slate-100 items-start">
+                  <div className="px-5 py-4 flex items-start gap-2.5">
+                    <FileText className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700 leading-snug">Paper &amp; PDF forms</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Standard at most facilities</p>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 border-l border-slate-100 flex items-start gap-2">
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-slate-500">Redone at every visit. Error-prone, not portable, lost between systems.</p>
+                  </div>
+                  <div className="px-5 py-4 border-l border-blue-100 bg-blue-50/30 flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-blue-800 font-medium">Filled once, reused at every provider — no re-entry ever.</p>
+                  </div>
+                </div>
+
+                {/* Row 2: EHR portals */}
+                <div className="grid grid-cols-[1fr_1fr_1fr] border-b border-slate-100 items-start">
+                  <div className="px-5 py-4 flex items-start gap-2.5">
+                    <Globe className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700 leading-snug">MyChart &amp; EHR portals</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Epic, Cerner, Oracle Health</p>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 border-l border-slate-100 flex items-start gap-2">
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-slate-500">Siloed to one health system. Doesn't travel to outside facilities, specialists, or urgent care.</p>
+                  </div>
+                  <div className="px-5 py-4 border-l border-blue-100 bg-blue-50/30 flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-blue-800 font-medium">Provider-agnostic and patient-owned — works regardless of which EHR the facility runs.</p>
+                  </div>
+                </div>
+
+                {/* Row 3: Health record apps */}
+                <div className="grid grid-cols-[1fr_1fr_1fr] items-start">
+                  <div className="px-5 py-4 flex items-start gap-2.5">
+                    <Smartphone className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700 leading-snug">Apple Health &amp; record apps</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Aggregated health data</p>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 border-l border-slate-100 flex items-start gap-2">
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-slate-500">Aggregates records but produces no standardized intake packet a front desk can act on at point of care.</p>
+                  </div>
+                  <div className="px-5 py-4 border-l border-blue-100 bg-blue-50/30 flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                    <p className="text-sm text-blue-800 font-medium">Produces a ready-to-share intake packet plus an AI clinician summary. No provider app required.</p>
+                  </div>
+                </div>
+
+              </div>
+            </FadeIn>
+
+            {/* What's new callout */}
+            <FadeIn delay={250}>
+              <div className="mt-7 rounded-xl bg-blue-600 px-6 py-5 flex items-start gap-4 text-white">
+                <Sparkles className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-80" />
+                <p className="text-sm leading-relaxed">
+                  <span className="font-bold">What's genuinely new:</span> a patient-owned, provider-agnostic intake pass that stays current automatically and is FHIR-ready to feed Oracle Health and any EHR — with no installation required on the provider side.
+                </p>
+              </div>
+            </FadeIn>
           </div>
         </section>
 
