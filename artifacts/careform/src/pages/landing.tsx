@@ -903,8 +903,9 @@ export default function Landing() {
               <FadeIn delay={160}>
                 <div className="border border-slate-100 rounded-2xl p-7 h-full flex flex-col gap-6 shadow-sm">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-3">What's next</p>
-                    <h3 className="text-xl font-bold text-slate-900 leading-snug">The roadmap from prototype to platform.</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-3">Near-term roadmap</p>
+                    <h3 className="text-xl font-bold text-slate-900 leading-snug">What we would build with more time.</h3>
+                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">These are the next four investments that would take PatientPass from a working prototype to a production-grade platform.</p>
                   </div>
                   <div className="flex-1 space-y-5">
                     <div className="flex items-start gap-4">
@@ -912,17 +913,26 @@ export default function Landing() {
                         <GitMerge className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-slate-900">FHIR-based EHR integration</p>
-                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Write standardized intake directly into Oracle Health (Cerner), Epic, and other HL7 FHIR-compliant systems via the integration API layer. No manual re-entry, no duplicate records.</p>
+                        <p className="font-semibold text-sm text-slate-900">FHIR integration into EHRs</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Write standardized intake directly into Oracle Health (Cerner), Epic, and any HL7 FHIR-compliant system via the integration API layer — no manual re-entry, no duplicate records.</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
                       <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Stethoscope className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                        <Shield className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-slate-900">Provider pilots</p>
-                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Structured pilots with clinic groups to measure time saved at intake, reduction in missing-field rates, and patient satisfaction. Results feed back into the product.</p>
+                        <p className="font-semibold text-sm text-slate-900">Real provider verification and accounts</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Verified provider credentials (NPI lookup), persistent provider accounts, and structured consent workflows so access is auditable and legally sound.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-slate-900">Pharmacist-reviewed drug interaction checks</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">Automated screening of the patient medication list against known interactions, flagged for pharmacist review before the appointment — reducing adverse events at the source.</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -931,7 +941,7 @@ export default function Landing() {
                       </div>
                       <div>
                         <p className="font-semibold text-sm text-slate-900">Multi-language support</p>
-                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">AI-powered translation of intake forms and summaries for patients whose first language is not English, starting with Spanish and Mandarin.</p>
+                        <p className="text-slate-500 text-sm leading-relaxed mt-0.5">AI-powered translation of intake forms and clinician summaries for patients whose first language is not English, starting with Spanish and Mandarin.</p>
                       </div>
                     </div>
                   </div>
@@ -981,15 +991,20 @@ export default function Landing() {
         </section>
 
         {/* ════════════════════════════════════════════ FOOTER */}
-        <footer className="border-t border-slate-100 px-6 md:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-bold text-base tracking-tight text-primary">PatientPass AI</span>
-          <span className="text-sm text-slate-400 text-center">
-            Healthcare intake made simple, secure, and patient controlled.
-          </span>
-          <div className="flex items-center gap-4 text-xs text-slate-400">
-            <Link href="/patient" className="hover:text-primary transition-colors">Patient</Link>
-            <Link href="/provider" className="hover:text-primary transition-colors">Provider</Link>
+        <footer className="border-t border-slate-100 px-6 md:px-10 pt-6 pb-8 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="font-bold text-base tracking-tight text-primary">PatientPass AI</span>
+            <span className="text-sm text-slate-400 text-center">
+              Healthcare intake made simple, secure, and patient controlled.
+            </span>
+            <div className="flex items-center gap-4 text-xs text-slate-400">
+              <Link href="/patient" className="hover:text-primary transition-colors">Patient</Link>
+              <Link href="/provider" className="hover:text-primary transition-colors">Provider</Link>
+            </div>
           </div>
+          <p className="text-center text-xs text-slate-400 border-t border-slate-100 pt-4">
+            Demo uses synthetic sample data only. No real patient information is used.
+          </p>
         </footer>
 
       </main>
